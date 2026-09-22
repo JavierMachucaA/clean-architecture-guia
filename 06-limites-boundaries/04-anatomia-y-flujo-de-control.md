@@ -24,10 +24,13 @@ El flujo de control es **quién llama a quién en ejecución**. La dependencia d
 
 ```mermaid
 flowchart LR
-    AN["Alto nivel<br/>(política)"] -->|"llama y depende"| BN["Bajo nivel<br/>(detalle)"]
+    AN["Alto nivel<br/>(política)"] -->|"llama Y depende"| BN["Bajo nivel<br/>(detalle: DB / UI)"]
+
+    style AN fill:#2e7d32,stroke:#1b5e20,stroke-width:2px,color:#fff
+    style BN fill:#c62828,stroke:#8e0000,stroke-width:2px,color:#fff
 ```
 
-Aquí el alto nivel depende del detalle: cambiar el detalle obliga a tocar la política. Es lo que queremos evitar en un límite.
+Aquí el flujo de control **y** la dependencia del código van en el mismo sentido: el alto nivel depende del detalle. Cambiar el detalle obliga a tocar la política. Es justo lo que queremos evitar en un límite.
 
 ### Cuando se oponen (con inversión de dependencias)
 
@@ -36,30 +39,36 @@ Insertamos una interfaz que **el alto nivel posee** y que **el bajo nivel implem
 ```mermaid
 flowchart LR
     AN["Alto nivel<br/>(política)"] -->|usa| I["«interface»<br/>frontera del límite"]
-    BN["Bajo nivel<br/>(detalle)"] -.implementa.-> I
+    BN["Bajo nivel<br/>(detalle: DB / UI)"] -.implementa.-> I
 
-    style I stroke-dasharray: 5 5
+    style AN fill:#2e7d32,stroke:#1b5e20,stroke-width:2px,color:#fff
+    style BN fill:#c62828,stroke:#8e0000,stroke-width:2px,color:#fff
+    style I fill:#1565c0,stroke:#0d47a1,stroke-width:2px,color:#fff,stroke-dasharray: 5 5
 ```
 
-El siguiente diagrama muestra explícitamente los **dos sentidos opuestos**: el flujo de control va de izquierda a derecha, mientras la flecha de dependencia del código va, invertida, de derecha a izquierda.
+El punto fino es que **el flujo de control y la dependencia del código apuntan en sentidos opuestos**. El siguiente diagrama los muestra a la vez sobre el mismo límite: la flecha sólida (control) cruza hacia el detalle, mientras la flecha punteada (dependencia) apunta de vuelta hacia la abstracción del núcleo.
 
+```mermaid
+flowchart LR
+    subgraph nucleo["NÚCLEO (política)"]
+        AN["Alto nivel"]
+        I["«interface»<br/>posee el núcleo"]
+    end
+    subgraph detalle["DETALLE (plugin)"]
+        BN["Bajo nivel<br/>(DB / UI)"]
+    end
+
+    AN -->|"1 · FLUJO DE CONTROL (ejecución)"| BN
+    BN -.->|"2 · DEPENDENCIA DEL CÓDIGO (implementa)"| I
+
+    style AN fill:#2e7d32,stroke:#1b5e20,stroke-width:2px,color:#fff
+    style I fill:#1565c0,stroke:#0d47a1,stroke-width:2px,color:#fff,stroke-dasharray: 5 5
+    style BN fill:#c62828,stroke:#8e0000,stroke-width:2px,color:#fff
+    style nucleo fill:#1b5e20,stroke:#2e7d32,stroke-width:2px,color:#fff
+    style detalle fill:#8e0000,stroke:#c62828,stroke-width:2px,color:#fff
 ```
-                          LÍMITE
-                            │
-   FLUJO DE CONTROL         │
-   Alto nivel  ───────────────────────────►  Bajo nivel
-   (política)               │                 (detalle: DB / UI)
-                            │
-   DEPENDENCIA DEL CÓDIGO   │
-   Alto nivel               │                 Bajo nivel
-       ▲                    │                     │
-       │◄───────────────────┼─────────────────────┘
-       │        «interface» │  (implementa)
-       └─ posee la interfaz │
-                            │
-   ► Control cruza a la derecha.  ◄ La dependencia apunta a la izquierda.
-     Son OPUESTOS gracias a DIP.
-```
+
+En ejecución el control sale del núcleo hacia el detalle (flecha 1), pero en el código el detalle es quien depende del núcleo al implementar su interfaz (flecha 2). Esa oposición deliberada es la inversión de dependencias (DIP).
 
 ## Por qué esto importa
 
@@ -75,6 +84,8 @@ flowchart TD
     B --> C["El detalle implementa<br/>la interfaz del núcleo"]
     C --> D["Dependencia del código<br/>apunta hacia el núcleo"]
     D --> E["Límite desacoplado +<br/>arquitectura plugin"]
+
+    style E fill:#2e7d32,stroke:#1b5e20,stroke-width:2px,color:#fff
 ```
 
 ## Punto clave para recordar

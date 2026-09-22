@@ -58,9 +58,9 @@ Aplazar una decisión sobre un detalle tiene dos beneficios concretos:
 ```mermaid
 flowchart TD
     P["Política de negocio<br/>(no sabe qué DB usa)"] -->|habla contra| I["Interfaz / boundary"]
-    I --> DB1["Opción A: PostgreSQL"]
-    I --> DB2["Opción B: MongoDB"]
-    I --> DB3["Opción C: archivos en memoria (para test)"]
+    I --> DB1["Opción A:<br/>PostgreSQL"]
+    I --> DB2["Opción B:<br/>MongoDB"]
+    I --> DB3["Opción C:<br/>archivos en memoria<br/>(para test)"]
     style P fill:#dfe
 ```
 

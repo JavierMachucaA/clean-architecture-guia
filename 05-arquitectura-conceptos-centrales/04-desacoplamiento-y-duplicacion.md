@@ -38,6 +38,50 @@ flowchart TB
 
 Cuando ambos cortes están hechos, cambiar un caso de uso no toca a los demás, y cambiar una capa (por ejemplo, la base de datos) no toca a las reglas de negocio.
 
+### Ejemplo: de acoplado a desacoplado
+
+Un código **acoplado** mezcla en un mismo sitio la regla de negocio, el acceso a la base de datos y el HTTP. Si cambias de motor de datos o de framework, tocas la regla:
+
+```python
+# ❌ Todo mezclado: regla de negocio + SQL + HTTP en el mismo sitio
+@app.post("/pedidos/{id}/cancelar")
+def cancelar_pedido(id):
+    row = db.execute("SELECT estado FROM pedidos WHERE id = %s", id)  # persistencia
+    if row["estado"] == "ENVIADO":                                    # regla de negocio
+        return {"error": "no se puede cancelar"}, 409                 # UI/HTTP
+    db.execute("UPDATE pedidos SET estado = 'CANCELADO' WHERE id = %s", id)
+    return {"ok": True}, 200
+```
+
+La versión **desacoplada** deja que la regla de negocio hable contra una interfaz (boundary), sin saber nada de SQL ni de HTTP. Cambiar la base de datos ya no toca la regla:
+
+```python
+# Capa de dominio: solo la regla, no sabe de DB ni de HTTP
+class Pedido:
+    def cancelar(self):
+        if self.estado == "ENVIADO":
+            raise PedidoNoCancelable()
+        self.estado = "CANCELADO"
+
+# Boundary: contrato que el dominio necesita
+class RepositorioPedidos(ABC):
+    @abstractmethod
+    def obtener(self, id) -> Pedido: ...
+    @abstractmethod
+    def guardar(self, pedido: Pedido): ...
+
+# Caso de uso: orquesta, sigue sin saber qué DB hay debajo
+class CancelarPedido:
+    def __init__(self, repo: RepositorioPedidos):
+        self.repo = repo
+    def ejecutar(self, id):
+        pedido = self.repo.obtener(id)
+        pedido.cancelar()
+        self.repo.guardar(pedido)
+```
+
+Aquí se ven los dos cortes a la vez: el **horizontal** (dominio, caso de uso y persistencia separados) y el **vertical** (`CancelarPedido` es su propia clase, aislada de `AltaPedido` o `ConsultarEstado`).
+
 ## Duplicación real vs duplicación accidental
 
 Al desacoplar, aparece la tentación de "unificar" trozos de código que se parecen. Aquí Uncle Bob advierte sobre una trampa clásica: no toda duplicación es mala.
@@ -64,6 +108,29 @@ Al desacoplar, aparece la tentación de "unificar" trozos de código que se pare
 ```
 
 > Si unificas dos cosas que solo *parecen* iguales, en cuanto una necesite cambiar por su cuenta tendrás que volver a separarlas, y habrás introducido un acoplamiento peligroso mientras tanto.
+
+### Ejemplo: real vs accidental
+
+La duplicación **real** repite la misma regla en varios sitios. Si la regla cambia, todos deben cambiar juntos, así que conviene unificarla:
+
+```python
+# ❌ Real: la misma regla de IVA repetida. Si el IVA sube al 19%, hay que tocar dos sitios.
+total_factura = precio * 1.18
+total_ticket  = precio * 1.18
+
+# ✅ Unificado en un solo lugar
+def aplicar_iva(precio): return precio * 1.18
+```
+
+La duplicación **accidental** son dos cálculos que hoy lucen idénticos pero responden a reglas distintas que evolucionarán por separado:
+
+```python
+# Hoy lucen iguales, pero son reglas diferentes que casualmente coinciden en el número
+descuento_empleado = precio * 0.10
+descuento_black_friday = precio * 0.10
+```
+
+Si los unificas en un solo `aplicar_descuento_10()`, el día que Black Friday suba al 15% pero el de empleado siga en 10% tendrás que volver a separarlos. La pista clave para distinguirlas es preguntar: **¿cambiarán por la misma razón?** El IVA sí; los descuentos no.
 
 ## Los tres modos de desacoplamiento
 
