@@ -20,7 +20,7 @@ flowchart TD
         IMPL["🗄️ OrderGatewaySQL<br/>implements OrderGateway<br/>(ejecuta el SQL de verdad)"]
     end
     UC ==>|usa| G
-    IMPL ==>|implements (hacia adentro)| G
+    IMPL ==>|"implements (hacia adentro)"| G
 
     style UC fill:#2e7d32,stroke:#a5d6a7,color:#fff,stroke-width:2px
     style G fill:#1565c0,stroke:#90caf9,color:#fff,stroke-width:2px
