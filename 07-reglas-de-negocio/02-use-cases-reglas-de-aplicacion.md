@@ -11,55 +11,52 @@ Un caso de uso define un **flujo**: la interacción entre el usuario y las entid
 ## Ejemplo: "Aprobar un préstamo"
 
 ```
-Caso de uso: Aprobar préstamo
-  Entrada:  datos del solicitante, monto pedido
-  Reglas de aplicación:
-    1. Verificar que el solicitante tenga score >= 650
-    2. Verificar que el monto <= límite permitido
-    3. Crear la entidad Prestamo y pedirle calcularPagoMensual()
-    4. Registrar el préstamo aprobado
-  Salida:   préstamo aprobado con su pago mensual, o rechazo con motivo
+Use case: ApproveLoan
+  Input:  applicant data, requested amount
+  Application rules:
+    1. Verify that the applicant has score >= 650
+    2. Verify that the amount <= allowed limit
+    3. Create the Loan entity and ask it to calculateMonthlyPayment()
+    4. Register the approved loan
+  Output:  approved loan with its monthly payment, or rejection with reason
 ```
 
-Nota que el **paso 3 usa la entidad** (`Prestamo.calcularPagoMensual()`), pero los pasos 1, 2 y 4 son reglas propias de **esta aplicación**: otro banco podría automatizar el mismo negocio con un flujo distinto.
+Nota que el **paso 3 usa la entidad** (`Loan.calculateMonthlyPayment()`), pero los pasos 1, 2 y 4 son reglas propias de **esta aplicación**: otro banco podría automatizar el mismo negocio con un flujo distinto.
 
 ## El caso de uso orquesta, la entidad calcula
 
 ```mermaid
 sequenceDiagram
-    participant UI as Entrada (detalle)
-    participant UC as AprobarPrestamoUseCase
-    participant E as Prestamo (Entity)
-    participant R as Repositorio (interface)
+    participant UI as Input [detail]
+    participant UC as ApproveLoanUseCase
+    participant E as Loan [Entity]
+    participant R as Repository [interface]
 
-    UI->>UC: request (datos solicitante, monto)
-    UC->>UC: validar score y limites (regla de app)
-    UC->>E: new Prestamo(...); calcularPagoMensual()
-    E-->>UC: pago mensual
-    UC->>R: guardar(prestamo)
-    UC-->>UI: response (aprobado + pago mensual)
+    UI->>UC: request with applicant data and amount
+    Note over UC: validate score and limits<br/>(application rule)
+    UC->>E: create Loan and calculateMonthlyPayment
+    E-->>UC: monthly payment
+    UC->>R: save loan
+    UC-->>UI: response approved + monthly payment
 ```
 
 ## Dónde vive un caso de uso
 
-```
-   [ Detalle: Controller/UI ]
-             │  request model
-             ▼
-   ┌───────────────────────────┐
-   │  USE CASE                 │
-   │   valida reglas de app    │
-   │   coordina el flujo       │
-   │        │  usa             │
-   │        ▼                  │
-   │   [ ENTITY: reglas core ] │
-   │        │                  │
-   │        ▼  interface       │
-   │   [ Repositorio abstracto]│
-   └───────────────────────────┘
-             │  response model
-             ▼
-   [ Detalle: Presenter/UI ]
+```mermaid
+flowchart TB
+    CTRL["Detail: Controller / UI"] -->|request model| UC
+    subgraph app["Application layer"]
+        UC["USE CASE<br/>validates app rules<br/>coordinates the flow"] -->|uses| ENT["ENTITY<br/>core business rules"]
+        UC -->|talks to| REPO["Repository<br/>«interface» abstraction"]
+    end
+    UC -->|response model| PRES["Detail: Presenter / UI"]
+
+    style CTRL fill:#455a64,stroke:#263238,stroke-width:2px,color:#fff
+    style PRES fill:#455a64,stroke:#263238,stroke-width:2px,color:#fff
+    style UC fill:#1565c0,stroke:#0d47a1,stroke-width:2px,color:#fff
+    style ENT fill:#2e7d32,stroke:#1b5e20,stroke-width:2px,color:#fff
+    style REPO fill:#6a1b9a,stroke:#4a148c,stroke-width:2px,color:#fff,stroke-dasharray: 5 5
+    style app fill:#0d47a1,stroke:#1565c0,stroke-width:1px,color:#fff
 ```
 
 ## Diferencia entre los dos niveles de reglas
@@ -68,17 +65,17 @@ sequenceDiagram
 |---------|------------------|-----------------------|
 | Alcance | Todo el negocio | Esta aplicación |
 | Existiría sin software | Sí | No (describe la automatización) |
-| Ejemplo | Fórmula del interés | Flujo de "aprobar préstamo" |
+| Ejemplo | Fórmula del interés | Flujo de "ApproveLoan" |
 | Estabilidad | Muy alta | Alta, pero cambia si cambia el proceso |
 | Depende de | Nada | De las entidades |
 
 ### Ejemplo ❌ — caso de uso que mete reglas de empresa
 
 ```java
-class AprobarPrestamoUseCase {
-    Response ejecutar(Request r) {
-        // ❌ La fórmula del interés es regla de EMPRESA, no de la app
-        double interes = r.monto * 0.05 * r.plazo;
+class ApproveLoanUseCase {
+    Response execute(Request r) {
+        // ❌ The interest formula is an ENTERPRISE rule, not an app rule
+        double interest = r.amount * 0.05 * r.term;
         // ...
     }
 }
@@ -87,13 +84,13 @@ class AprobarPrestamoUseCase {
 ### Ejemplo ✅ — caso de uso que delega en la entidad
 
 ```java
-class AprobarPrestamoUseCase {
-    Response ejecutar(Request r) {
-        if (r.score < 650) return Response.rechazo("Score insuficiente");
-        Prestamo p = new Prestamo(r.monto, tasaVigente, r.plazo);
-        Dinero pago = p.calcularPagoMensual(); // ✅ regla de empresa en la entidad
-        repositorio.guardar(p);
-        return Response.aprobado(pago);
+class ApproveLoanUseCase {
+    Response execute(Request r) {
+        if (r.score < 650) return Response.rejected("Insufficient score");
+        Loan loan = new Loan(r.amount, currentRate, r.term);
+        Money payment = loan.calculateMonthlyPayment(); // ✅ enterprise rule in the entity
+        repository.save(loan);
+        return Response.approved(payment);
     }
 }
 ```

@@ -6,37 +6,47 @@ En algún punto el sistema **tiene que** ir hacia afuera: un caso de uso necesit
 
 > Con **inversión de dependencias**: el **flujo de control** cruza el límite hacia afuera, mientras que la **dependencia del código fuente** apunta hacia adentro.
 
-```
-   Flujo de control   :  Use Case ───────────►  Presenter / Gateway (exterior)
-   Dependencia código :  Use Case ─►(«interface»)◄─── Presenter / Gateway
-                                     Output Port
-                                     (¡invertida respecto al flujo!)
+```mermaid
+flowchart LR
+    UC["Use Case<br/>(inner)"] -->|"1 · uses"| OP["«interface»<br/>Output Port<br/>(inner)"]
+    PG["Presenter / Gateway<br/>(outer)"] -.->|"2 · implements"| OP
+    UC -.->|"control flow at runtime"| PG
+
+    style UC fill:#c62828,stroke:#8e0000,stroke-width:2px,color:#fff
+    style OP fill:#1565c0,stroke:#0d47a1,stroke-width:2px,color:#fff,stroke-dasharray:5 5
+    style PG fill:#455a64,stroke:#263238,stroke-width:2px,color:#fff
+    linkStyle 2 stroke:#2e7d32,stroke-width:2px,stroke-dasharray:4 4
 ```
 
-El caso de uso llama a una **interfaz** (un *puerto de salida*) que él mismo declara. El anillo externo la **implementa**. Así el control sale, pero la flecha de dependencia entra.
+El caso de uso llama a una **interfaz** (un *puerto de salida*) que él mismo declara (flecha 1). El anillo externo la **implementa** (flecha 2). En ejecución el control sale hacia el Presenter (flecha verde), pero la flecha de dependencia del código entra: el Presenter depende del interior, no al revés.
 
 ## Puertos de entrada y de salida
 
 ```mermaid
 flowchart LR
-    subgraph EXT["Interface Adapters / Frameworks (exterior)"]
+    subgraph EXT["Interface Adapters / Frameworks (outer)"]
         C["Controller"]
         P["Presenter"]
     end
 
-    subgraph INT["Use Cases (interior)"]
+    subgraph INT["Use Cases (inner)"]
         IP["«interface»<br/>Input Port"]
         UC["Use Case<br/>Interactor"]
         OP["«interface»<br/>Output Port"]
     end
 
-    C -->|invoca| IP
+    C -->|invokes| IP
     IP --- UC
-    UC -->|usa| OP
-    P -. implementa .-> OP
+    UC -->|uses| OP
+    P -. implements .-> OP
 
-    style IP stroke-dasharray:5 5
-    style OP stroke-dasharray:5 5
+    style C fill:#455a64,stroke:#263238,stroke-width:2px,color:#fff
+    style P fill:#455a64,stroke:#263238,stroke-width:2px,color:#fff
+    style UC fill:#c62828,stroke:#8e0000,stroke-width:2px,color:#fff
+    style IP fill:#1565c0,stroke:#0d47a1,stroke-width:2px,color:#fff,stroke-dasharray:5 5
+    style OP fill:#1565c0,stroke:#0d47a1,stroke-width:2px,color:#fff,stroke-dasharray:5 5
+    style EXT fill:#37474f,stroke:#263238,stroke-width:1px,color:#fff
+    style INT fill:#8e0000,stroke:#c62828,stroke-width:1px,color:#fff
 ```
 
 - El **Controller** depende del **Input Port** (interfaz interior) → dependencia hacia adentro.
@@ -44,30 +54,27 @@ flowchart LR
 
 ## Flujo típico: Controller → Use Case → Presenter
 
-```
-   1) Web/Framework   ──►  Controller               (empaqueta la petición)
-   2) Controller      ──►  Input Port  (interface)  (entra al caso de uso)
-   3) Interactor      ──►  Entities                 (aplica reglas de negocio)
-   4) Interactor      ──►  Output Port (interface)  (entrega el resultado)
-   5) Presenter       ──►  ViewModel / View         (formatea la salida)
+1. **Web / Framework → Controller** — empaqueta la petición.
+2. **Controller → Input Port** (interface) — entra al caso de uso.
+3. **Interactor → Entities** — aplica las reglas de negocio.
+4. **Interactor → Output Port** (interface) — entrega el resultado.
+5. **Presenter → ViewModel / View** — formatea la salida.
 
-   El CONTROL fluye 1→5 (hacia afuera al final),
-   pero cada DEPENDENCIA de código apunta hacia adentro (a las interfaces del interior).
-```
+El **control** fluye de 1 a 5 (hacia afuera al final), pero cada **dependencia de código** apunta hacia adentro, a las interfaces del interior. El diagrama de secuencia lo muestra paso a paso:
 
 ```mermaid
 sequenceDiagram
-    participant W as Web (Framework)
+    participant W as Web [Framework]
     participant C as Controller
     participant U as Use Case Interactor
     participant E as Entities
     participant P as Presenter
-    W->>C: petición HTTP
-    C->>U: request model (vía Input Port)
-    U->>E: aplica reglas de negocio
-    E-->>U: resultado
-    U->>P: response model (vía Output Port)
-    P-->>W: ViewModel / vista formateada
+    W->>C: HTTP request
+    C->>U: request model via Input Port
+    U->>E: apply business rules
+    E-->>U: result
+    U->>P: response model via Output Port
+    P-->>W: ViewModel / formatted view
 ```
 
 ## Tabla: control vs. dependencia en el cruce

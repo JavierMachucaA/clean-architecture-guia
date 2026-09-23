@@ -10,14 +10,28 @@ Su única misión es transportar datos a través del **boundary** (límite) que 
 
 Podría parecer natural pasarle la entidad directamente al controller o devolverla en la respuesta. Uncle Bob lo desaconseja: crearía un **acoplamiento** entre el caso de uso y su entorno.
 
+```mermaid
+flowchart LR
+    subgraph bad["❌ Acoplamiento fuerte"]
+        C1["Controller"] --> E1["Entity"]
+    end
+    subgraph good["✅ Boundary limpio"]
+        C2["Controller"] --> RQ["RequestModel"] --> UC["UseCase"]
+        UC --> RS["ResponseModel"] --> PR["Presenter"]
+    end
+
+    style C1 fill:#455a64,stroke:#263238,stroke-width:2px,color:#fff
+    style E1 fill:#c62828,stroke:#8e0000,stroke-width:2px,color:#fff
+    style C2 fill:#455a64,stroke:#263238,stroke-width:2px,color:#fff
+    style PR fill:#455a64,stroke:#263238,stroke-width:2px,color:#fff
+    style RQ fill:#1565c0,stroke:#0d47a1,stroke-width:2px,color:#fff
+    style RS fill:#1565c0,stroke:#0d47a1,stroke-width:2px,color:#fff
+    style UC fill:#2e7d32,stroke:#1b5e20,stroke-width:2px,color:#fff
+    style bad fill:#8e0000,stroke:#c62828,stroke-width:1px,color:#fff
+    style good fill:#1b5e20,stroke:#2e7d32,stroke-width:1px,color:#fff
 ```
-   ❌ Acoplamiento fuerte              ✅ Boundary limpio
-   Controller ──► Entity              Controller ──► RequestModel ──► UseCase
-                                                                        │
-   (el controller depende            UseCase ──► ResponseModel ──► Presenter
-    de la estructura interna
-    de la regla de negocio)          (nadie depende de la entidad interna)
-```
+
+En el lado ❌ el controller depende de la estructura interna de la regla de negocio. En el lado ✅ nadie depende de la entidad interna: los modelos son el contrato del borde.
 
 Los modelos son un **contrato estable** en el borde del caso de uso, desacoplado de cómo estén hechas las entidades por dentro.
 
@@ -25,43 +39,38 @@ Los modelos son un **contrato estable** en el borde del caso de uso, desacoplado
 
 ```mermaid
 classDiagram
-    class AprobarPrestamoRequest {
-        +String idSolicitante
+    class ApproveLoanRequest {
+        +String applicantId
         +int score
-        +double montoPedido
-        +int plazoMeses
+        +double requestedAmount
+        +int termMonths
     }
-    class AprobarPrestamoResponse {
-        +boolean aprobado
-        +double pagoMensual
-        +String motivoRechazo
+    class ApproveLoanResponse {
+        +boolean approved
+        +double monthlyPayment
+        +String rejectionReason
     }
-    class AprobarPrestamoUseCase {
-        +ejecutar(AprobarPrestamoRequest) AprobarPrestamoResponse
+    class ApproveLoanUseCase {
+        +execute(ApproveLoanRequest) ApproveLoanResponse
     }
-    AprobarPrestamoUseCase ..> AprobarPrestamoRequest : recibe
-    AprobarPrestamoUseCase ..> AprobarPrestamoResponse : produce
+    ApproveLoanUseCase ..> ApproveLoanRequest : receives
+    ApproveLoanUseCase ..> ApproveLoanResponse : produces
 ```
 
 ## Flujo del dato a través del boundary
 
-```
-   [ Web / HTTP ]
-        │  parsea JSON, arma...
-        ▼
-   ┌─────────────────────┐
-   │  RequestModel       │  (plano: strings, números, fechas)
-   └─────────┬───────────┘
-             ▼
-   ┌─────────────────────┐
-   │  USE CASE           │  usa entidades, aplica reglas
-   └─────────┬───────────┘
-             ▼
-   ┌─────────────────────┐
-   │  ResponseModel      │  (plano: sin objetos de dominio)
-   └─────────┬───────────┘
-             ▼
-   [ Presenter → HTML / JSON / UI ]
+```mermaid
+flowchart TB
+    WEB["Web / HTTP"] -->|parsea JSON| RQ["RequestModel<br/>plano: strings, números, fechas"]
+    RQ --> UC["USE CASE<br/>usa entidades, aplica reglas"]
+    UC --> RS["ResponseModel<br/>plano: sin objetos de dominio"]
+    RS --> PR["Presenter → HTML / JSON / UI"]
+
+    style WEB fill:#455a64,stroke:#263238,stroke-width:2px,color:#fff
+    style PR fill:#455a64,stroke:#263238,stroke-width:2px,color:#fff
+    style RQ fill:#1565c0,stroke:#0d47a1,stroke-width:2px,color:#fff
+    style RS fill:#1565c0,stroke:#0d47a1,stroke-width:2px,color:#fff
+    style UC fill:#2e7d32,stroke:#1b5e20,stroke-width:2px,color:#fff
 ```
 
 ## Reglas de un buen modelo
@@ -77,22 +86,22 @@ classDiagram
 ### Ejemplo ❌ — request atado a la web y a la entidad
 
 ```java
-// ❌ Sabe de HTTP (anotaciones) y expone la entidad de dominio
-class AprobarPrestamoRequest {
-    @JsonProperty("monto") HttpServletRequest raw;
-    Prestamo prestamoDominio; // filtra la entidad hacia afuera
+// ❌ Knows about HTTP (annotations) and exposes the domain entity
+class ApproveLoanRequest {
+    @JsonProperty("amount") HttpServletRequest raw;
+    Loan domainLoan; // leaks the entity outward
 }
 ```
 
 ### Ejemplo ✅ — request plano y neutral
 
 ```java
-// ✅ Solo datos simples; no sabe de HTTP ni de la DB
-class AprobarPrestamoRequest {
-    final String idSolicitante;
+// ✅ Only simple data; knows nothing about HTTP or the DB
+class ApproveLoanRequest {
+    final String applicantId;
     final int score;
-    final double montoPedido;
-    final int plazoMeses;
+    final double requestedAmount;
+    final int termMonths;
 }
 ```
 

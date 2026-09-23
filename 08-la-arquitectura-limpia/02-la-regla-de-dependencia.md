@@ -6,13 +6,19 @@
 
 Dicho de otro modo: **nada en un anillo interior puede saber absolutamente nada de algo en un anillo exterior**. Los nombres declarados en un anillo externo (una función, una clase, una variable, una entidad de software) **no deben ser mencionados** por el código de un anillo interno.
 
-```
-   Frameworks & Drivers  ──►  Interface Adapters  ──►  Use Cases  ──►  Entities
-        (exterior)                                                     (interior)
+```mermaid
+flowchart LR
+    FD["Frameworks & Drivers<br/>(exterior)"] -->|depende de| IA["Interface Adapters"]
+    IA -->|depende de| UC["Use Cases"]
+    UC -->|depende de| EN["Entities<br/>(interior)"]
 
-   La flecha ──► significa "depende de / conoce a".
-   Toda flecha apunta HACIA ADENTRO. Ninguna apunta hacia afuera.
+    style FD fill:#455a64,stroke:#263238,stroke-width:2px,color:#fff
+    style IA fill:#6a1b9a,stroke:#4a148c,stroke-width:2px,color:#fff
+    style UC fill:#c62828,stroke:#8e0000,stroke-width:2px,color:#fff
+    style EN fill:#f9a825,stroke:#f57f17,stroke-width:2px,color:#000
 ```
+
+La flecha significa "depende de / conoce a". Toda flecha apunta **hacia adentro**; ninguna apunta hacia afuera.
 
 ## Lo interior no conoce lo exterior
 
@@ -28,7 +34,11 @@ flowchart LR
     UC -. NO conoce .-> IA
     IA -. NO conoce .-> FD
 
-    linkStyle 3,4,5 stroke:#c0392b,stroke-dasharray:5 5
+    style FD fill:#455a64,stroke:#263238,stroke-width:2px,color:#fff
+    style IA fill:#6a1b9a,stroke:#4a148c,stroke-width:2px,color:#fff
+    style UC fill:#c62828,stroke:#8e0000,stroke-width:2px,color:#fff
+    style EN fill:#f9a825,stroke:#f57f17,stroke-width:2px,color:#000
+    linkStyle 3,4,5 stroke:#e74c3c,stroke-width:2px,stroke-dasharray:5 5
 ```
 
 Las flechas continuas (dependencias reales) van hacia adentro. Las flechas punteadas rojas representan un "conocimiento hacia afuera" que **está prohibido**.
@@ -57,6 +67,9 @@ flowchart TD
     B --> T
     C --> T
     D --> T
+
+    style R fill:#1565c0,stroke:#0d47a1,stroke-width:2px,color:#fff
+    style T fill:#2e7d32,stroke:#1b5e20,stroke-width:2px,color:#fff
 ```
 
 Por eso puedes cambiar de base de datos (de Oracle a SQL Server), de framework web o de UI **sin tocar** las reglas de negocio: esos cambios ocurren en anillos externos y la regla impide que el interior dependa de ellos.

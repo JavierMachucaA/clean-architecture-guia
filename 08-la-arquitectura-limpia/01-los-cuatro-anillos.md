@@ -6,50 +6,24 @@ La Arquitectura Limpia organiza el sistema en **anillos concéntricos**. Cuanto 
 
 > El número de anillos no es sagrado: pueden ser más de cuatro. Lo que nunca cambia es que las dependencias siempre apuntan hacia adentro.
 
-### Diagrama de círculos concéntricos (ASCII)
-
-```
-        +---------------------------------------------------+
-        |        FRAMEWORKS & DRIVERS  (azul)               |
-        |    Web · DB · UI · Devices · External Interfaces  |
-        |   +-------------------------------------------+   |
-        |   |     INTERFACE ADAPTERS  (verde)           |   |
-        |   |  Controllers · Presenters · Gateways      |   |
-        |   |   +-----------------------------------+   |   |
-        |   |   |    USE CASES  (rojo)              |   |   |
-        |   |   |  Reglas de negocio de aplicación  |   |   |
-        |   |   |   +---------------------------+   |   |   |
-        |   |   |   |   ENTITIES  (amarillo)    |   |   |   |
-        |   |   |   | Reglas de negocio de la   |   |   |   |
-        |   |   |   |     empresa (críticas)    |   |   |   |
-        |   |   |   +---------------------------+   |   |   |
-        |   |   +-----------------------------------+   |   |
-        |   +-------------------------------------------+   |
-        +---------------------------------------------------+
-
-        <---- más concreto / volátil   |   más abstracto / estable ---->
-                 Las dependencias del código apuntan ──► hacia adentro
-```
-
-### Diagrama de círculos concéntricos (Mermaid)
+### Los anillos, de fuera hacia dentro
 
 ```mermaid
 flowchart TB
-    subgraph FD["Frameworks & Drivers (borde)"]
-        direction TB
-        subgraph IA["Interface Adapters"]
-            direction TB
-            subgraph UC["Use Cases"]
-                direction TB
-                EN["Entities<br/>(núcleo)"]
-            end
-        end
-    end
+    FD["🔵 Frameworks & Drivers<br/>Web · DB · UI · Devices<br/>· borde · muy volátil ·"]
+    IA["🟣 Interface Adapters<br/>Controllers · Presenters · Gateways<br/>· volatilidad media ·"]
+    UC["🔴 Use Cases<br/>Reglas de negocio de la aplicación<br/>· baja volatilidad ·"]
+    EN["🟡 Entities<br/>Reglas de negocio de la empresa (críticas)<br/>· núcleo · muy estable ·"]
 
-    FD -->|depende de| IA
-    IA -->|depende de| UC
-    UC -->|depende de| EN
+    FD --> IA --> UC --> EN
+
+    style FD fill:#455a64,stroke:#263238,stroke-width:2px,color:#fff
+    style IA fill:#6a1b9a,stroke:#4a148c,stroke-width:2px,color:#fff
+    style UC fill:#c62828,stroke:#8e0000,stroke-width:2px,color:#fff
+    style EN fill:#f9a825,stroke:#f57f17,stroke-width:2px,color:#000
 ```
+
+Cada caja apunta a la de adentro: esa flecha es la **dirección de la dependencia**. Va siempre hacia el núcleo (`Frameworks → Interface Adapters → Use Cases → Entities`), nunca al revés. De arriba hacia abajo el código se vuelve **más abstracto y estable**; de abajo hacia arriba, **más concreto y volátil**. Las Entities, en el centro, no dependen de ningún otro anillo.
 
 ## Qué vive en cada anillo
 

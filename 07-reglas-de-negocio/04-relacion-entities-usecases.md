@@ -15,7 +15,8 @@ flowchart LR
     UC["Use Case<br/>(regla de aplicación)"] -->|conoce / usa| E["Entity<br/>(regla de empresa)"]
     E -.->|NO conoce| UC
 
-    style E stroke-width:3px
+    style UC fill:#1565c0,stroke:#0d47a1,stroke-width:2px,color:#fff
+    style E fill:#2e7d32,stroke:#1b5e20,stroke-width:3px,color:#fff
     linkStyle 1 stroke-dasharray: 5 5
 ```
 
@@ -23,24 +24,23 @@ Si la entidad conociera al caso de uso, un cambio en el flujo de la aplicación 
 
 ## Visto en los círculos concéntricos
 
+```mermaid
+flowchart TB
+    subgraph FD["Frameworks & Drivers (más externo)"]
+        subgraph IA["Interface Adapters"]
+            subgraph UC["Use Cases"]
+                ENT["ENTITIES<br/>no dependen de nada"]
+            end
+        end
+    end
+
+    style FD fill:#455a64,stroke:#263238,stroke-width:2px,color:#fff
+    style IA fill:#6a1b9a,stroke:#4a148c,stroke-width:2px,color:#fff
+    style UC fill:#1565c0,stroke:#0d47a1,stroke-width:2px,color:#fff
+    style ENT fill:#2e7d32,stroke:#1b5e20,stroke-width:2px,color:#fff
 ```
-        ┌──────────────────────────────────────────┐
-        │  Frameworks & Drivers                      │
-        │   ┌──────────────────────────────────┐     │
-        │   │  Interface Adapters              │     │
-        │   │   ┌──────────────────────────┐   │     │
-        │   │   │  USE CASES               │   │     │
-        │   │   │   depende ──►            │   │     │
-        │   │   │   ┌──────────────────┐   │   │     │
-        │   │   │   │   ENTITIES       │   │   │     │
-        │   │   │   │  (no dependen    │   │   │     │
-        │   │   │   │   de nada)       │   │   │     │
-        │   │   │   └──────────────────┘   │   │     │
-        │   │   └──────────────────────────┘   │     │
-        │   └──────────────────────────────────┘     │
-        └──────────────────────────────────────────┘
-              La dependencia SIEMPRE apunta hacia adentro
-```
+
+La dependencia **siempre apunta hacia adentro**: cada anillo externo depende del que tiene dentro, nunca al revés. El anillo más profundo (Entities) no depende de ninguno.
 
 ## Tabla comparativa de la relación
 
@@ -56,31 +56,31 @@ Si la entidad conociera al caso de uso, un cambio en el flujo de la aplicación 
 ### ❌ — la entidad importa el caso de uso
 
 ```java
-// ❌ La entidad depende de la aplicación: dirección invertida
-package dominio;
-import aplicacion.AprobarPrestamoUseCase; // ¡mal!
+// ❌ The entity depends on the application: inverted direction
+package domain;
+import application.ApproveLoanUseCase; // wrong!
 
-class Prestamo {
-    void aprobarVia(AprobarPrestamoUseCase uc) { /* ... */ }
+class Loan {
+    void approveVia(ApproveLoanUseCase uc) { /* ... */ }
 }
 ```
 
 ### ✅ — el caso de uso importa la entidad
 
 ```java
-// ✅ El caso de uso depende de la entidad: dirección correcta
-package aplicacion;
-import dominio.Prestamo;
+// ✅ The use case depends on the entity: correct direction
+package application;
+import domain.Loan;
 
-class AprobarPrestamoUseCase {
-    Response ejecutar(Request r) {
-        Prestamo p = new Prestamo(r.montoPedido, tasaVigente, r.plazoMeses);
-        return Response.aprobado(p.calcularPagoMensual());
+class ApproveLoanUseCase {
+    Response execute(Request r) {
+        Loan loan = new Loan(r.requestedAmount, currentRate, r.termMonths);
+        return Response.approved(loan.calculateMonthlyPayment());
     }
 }
 ```
 
-La entidad `Prestamo` no tiene ni una sola referencia a `AprobarPrestamoUseCase`: podría usarse en un batch nocturno, en un reporte o en otra aplicación distinta sin cambiar una línea.
+La entidad `Loan` no tiene ni una sola referencia a `ApproveLoanUseCase`: podría usarse en un batch nocturno, en un reporte o en otra aplicación distinta sin cambiar una línea.
 
 ## Punto clave para recordar
 
