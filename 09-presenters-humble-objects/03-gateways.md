@@ -10,19 +10,21 @@ La solución es un **Gateway**: una interfaz (un *puerto*) que el caso de uso de
 
 ## Quién declara y quién implementa
 
-```
-   ┌─────────────── capa de casos de uso ───────────────┐
-   │                                                     │
-   │   Caso de uso  ──usa──►  «interface» PedidoGateway  │
-   │                          buscar(id)                 │
-   │                          guardar(pedido)            │
-   └───────────────────────────┬─────────────────────────┘
-                                │  implements (hacia adentro)
-   ┌────────────────────────────┴────────────────────────┐
-   │        capa de BD / servicios (detalle)              │
-   │   PedidoGatewaySQL   implements PedidoGateway        │
-   │   (ejecuta el SQL de verdad)                         │
-   └───────────────────────────────────────────────────────┘
+```mermaid
+flowchart TD
+    subgraph UseCaseLayer["capa de casos de uso"]
+        UC["⚙️ Use case"]
+        G["📦 «interface» OrderGateway<br/>findById(id)<br/>save(order)"]
+    end
+    subgraph DetailLayer["capa de BD / servicios (detalle)"]
+        IMPL["🗄️ OrderGatewaySQL<br/>implements OrderGateway<br/>(ejecuta el SQL de verdad)"]
+    end
+    UC ==>|usa| G
+    IMPL ==>|implements (hacia adentro)| G
+
+    style UC fill:#2e7d32,stroke:#a5d6a7,color:#fff,stroke-width:2px
+    style G fill:#1565c0,stroke:#90caf9,color:#fff,stroke-width:2px
+    style IMPL fill:#37474f,stroke:#90a4ae,color:#fff,stroke-width:2px
 ```
 
 La **interfaz vive adentro**; la **implementación vive afuera**. La flecha de dependencia (el `implements`) apunta hacia adentro, respetando la regla de dependencia.
@@ -31,9 +33,14 @@ La **interfaz vive adentro**; la **implementación vive afuera**. La flecha de d
 
 ```mermaid
 flowchart TD
-    UC["Caso de uso<br/>(capa interna)"] -->|depende de| G["«interface» Gateway<br/>(capa interna)"]
-    IMPL["GatewaySQL / GatewayHTTP<br/>(capa externa)"] -->|implementa| G
-    IMPL --> DB[("Base de datos /<br/>servicio externo")]
+    UC["⚙️ Use case<br/>(capa interna)"] ==>|depende de| G["📦 «interface» Gateway<br/>(capa interna)"]
+    IMPL["🔄 GatewaySQL / GatewayHTTP<br/>(capa externa)"] ==>|implementa| G
+    IMPL ==> DB[("🗄️ Base de datos /<br/>servicio externo")]
+
+    style UC fill:#2e7d32,stroke:#a5d6a7,color:#fff,stroke-width:2px
+    style G fill:#1565c0,stroke:#90caf9,color:#fff,stroke-width:2px
+    style IMPL fill:#6a1b9a,stroke:#ce93d8,color:#fff,stroke-width:2px
+    style DB fill:#37474f,stroke:#90a4ae,color:#fff,stroke-width:2px
 ```
 
 En tiempo de ejecución el caso de uso usa la implementación concreta, pero en tiempo de compilación **no la conoce**: solo conoce la interfaz. Ese es el mecanismo que mantiene el detalle afuera.
@@ -55,11 +62,11 @@ El patrón es el mismo para persistencia y para servicios externos:
 ❌ El caso de uso amarrado al detalle de SQL:
 
 ```java
-class RegistrarPedido {
-    void ejecutar(Pedido p) {
-        Connection c = DriverManager.getConnection(URL);      // detalle
+class RegisterOrder {
+    void execute(Order order) {
+        Connection c = DriverManager.getConnection(URL);      // detail
         PreparedStatement ps = c.prepareStatement("INSERT ..."); // SQL
-        ps.setString(1, p.getId());
+        ps.setString(1, order.getId());
         ps.executeUpdate();
     }
 }
@@ -68,27 +75,27 @@ class RegistrarPedido {
 ✅ El caso de uso depende de un Gateway; el SQL queda afuera:
 
 ```java
-// Capa interna: el puerto
-interface PedidoGateway {
-    void guardar(Pedido p);
-    Pedido buscar(String id);
+// Inner layer: the port
+interface OrderGateway {
+    void save(Order order);
+    Order findById(String id);
 }
 
-// Capa interna: la política, testeable con un gateway falso
-class RegistrarPedido {
-    private final PedidoGateway gateway;
-    RegistrarPedido(PedidoGateway gateway) { this.gateway = gateway; }
-    void ejecutar(Pedido p) { gateway.guardar(p); }
+// Inner layer: the policy, testable with a fake gateway
+class RegisterOrder {
+    private final OrderGateway gateway;
+    RegisterOrder(OrderGateway gateway) { this.gateway = gateway; }
+    void execute(Order order) { gateway.save(order); }
 }
 
-// Capa externa: el detalle (objeto humilde)
-class PedidoGatewaySQL implements PedidoGateway {
-    public void guardar(Pedido p) { /* INSERT real */ }
-    public Pedido buscar(String id) { /* SELECT real */ }
+// Outer layer: the detail (humble object)
+class OrderGatewaySQL implements OrderGateway {
+    public void save(Order order) { /* real INSERT */ }
+    public Order findById(String id) { /* real SELECT */ }
 }
 ```
 
-En los tests se inyecta un `PedidoGateway` en memoria y se prueba `RegistrarPedido` sin base de datos.
+En los tests se inyecta un `OrderGateway` en memoria y se prueba `RegisterOrder` sin base de datos.
 
 ## Beneficios
 

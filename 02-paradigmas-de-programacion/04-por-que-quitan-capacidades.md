@@ -6,9 +6,16 @@ Cada uno de los tres paradigmas se define por lo que **prohíbe**, no por lo que
 
 ```mermaid
 flowchart TD
-    E["Programación estructurada"] -->|te quita| E1["el goto<br/>(salto directo de control)"]
-    O["Programación orientada a objetos"] -->|te quita| O1["el puntero a función crudo<br/>(control indirecto sin disciplina)"]
-    F["Programación funcional"] -->|te quita| F1["la asignación<br/>(mutación de variables)"]
+    E["⚙️ Structured Programming"] ==>|te quita| E1["🚫 goto<br/>(salto directo de control)"]
+    O["⚙️ Object-Oriented Programming"] ==>|te quita| O1["🚫 Raw Function Pointer<br/>(control indirecto sin disciplina)"]
+    F["⚙️ Functional Programming"] ==>|te quita| F1["🚫 Assignment<br/>(mutación de variables)"]
+
+    style E fill:#1565c0,stroke:#90caf9,color:#fff,stroke-width:2px
+    style O fill:#1565c0,stroke:#90caf9,color:#fff,stroke-width:2px
+    style F fill:#1565c0,stroke:#90caf9,color:#fff,stroke-width:2px
+    style E1 fill:#c62828,stroke:#ff8a80,color:#fff,stroke-width:2px
+    style O1 fill:#c62828,stroke:#ff8a80,color:#fff,stroke-width:2px
+    style F1 fill:#c62828,stroke:#ff8a80,color:#fff,stroke-width:2px
 ```
 
 > Cada paradigma **le quita** algo al programador. Ninguno agrega una capacidad nueva; todos imponen una restricción sobre cómo se escribe el código.
@@ -38,10 +45,16 @@ Restringir lo que un programador *puede* hacer reduce el espacio de errores y ha
 
 ```mermaid
 flowchart LR
-    R["Restricción<br/>(quitar una capacidad)"] --> M["Menos formas de equivocarse"]
-    M --> P["Código más predecible"]
-    P --> A["Se puede razonar,<br/>probar y componer"]
-    A --> ARQ["Arquitectura posible"]
+    R["🚫 Restricción<br/>(quitar una capacidad)"] ==> M["⚙️ Menos formas de equivocarse"]
+    M ==> P["📦 Código más predecible"]
+    P ==> A["✅ Se puede razonar,<br/>probar y componer"]
+    A ==> ARQ["🧠 Arquitectura posible"]
+
+    style R fill:#c62828,stroke:#ff8a80,color:#fff,stroke-width:2px
+    style M fill:#1565c0,stroke:#90caf9,color:#fff,stroke-width:2px
+    style P fill:#1565c0,stroke:#90caf9,color:#fff,stroke-width:2px
+    style A fill:#2e7d32,stroke:#a5d6a7,color:#fff,stroke-width:2px
+    style ARQ fill:#2e7d32,stroke:#a5d6a7,color:#fff,stroke-width:3px
 ```
 
 La libertad total (por ejemplo, `goto` a cualquier parte, mutar cualquier variable, saltar por punteros sin control) produce caos. La disciplina produce estructura.
@@ -50,14 +63,19 @@ La libertad total (por ejemplo, `goto` a cualquier parte, mutar cualquier variab
 
 ```mermaid
 flowchart TD
-    subgraph Aportes
-        E["Estructurada →<br/>funciones comprobables<br/>(razonamiento y test)"]
-        O["OO →<br/>inversión de dependencias<br/>(boundaries)"]
-        F["Funcional →<br/>estado aislado<br/>(robustez y concurrencia)"]
+    subgraph Aportes["Aportes"]
+        E["⚙️ Structured →<br/>funciones comprobables<br/>(razonamiento y test)"]
+        O["🔄 OO →<br/>inversión de dependencias<br/>(boundaries)"]
+        F["📦 Functional →<br/>estado aislado<br/>(robustez y concurrencia)"]
     end
-    E --> CA["Clean Architecture"]
-    O --> CA
-    F --> CA
+    E ==> CA["🧠 Clean Architecture"]
+    O ==> CA
+    F ==> CA
+
+    style E fill:#1565c0,stroke:#90caf9,color:#fff,stroke-width:2px
+    style O fill:#6a1b9a,stroke:#ce93d8,color:#fff,stroke-width:2px
+    style F fill:#2e7d32,stroke:#a5d6a7,color:#fff,stroke-width:2px
+    style CA fill:#2e7d32,stroke:#a5d6a7,color:#fff,stroke-width:3px
 ```
 
 - La **estructurada** hace posible descomponer y probar el sistema.

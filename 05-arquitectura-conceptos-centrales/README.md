@@ -11,10 +11,16 @@ La arquitectura de un sistema es la **forma** que le dan quienes lo construyen: 
 
 Una buena arquitectura mantiene bajo el costo del ciclo de vida y logra ese ahorro **dejando abiertas tantas opciones como sea posible, durante el mayor tiempo posible**. Los detalles (base de datos, framework, forma de entrega web) son decisiones que la arquitectura debe permitir **aplazar** en vez de forzar temprano.
 
-```
-   Buena arquitectura  ─►  mantiene bajo el costo del ciclo de vida
-                       ─►  deja opciones abiertas el mayor tiempo posible
-                       ─►  separa POLÍTICA (reglas de negocio) de DETALLES (aplazables)
+```mermaid
+flowchart LR
+    BA["🧠 Good architecture"] ==> C["✅ Keeps lifecycle cost low"]
+    BA ==> O["✅ Keeps options open as long as possible"]
+    BA ==> S["🔄 Separates POLICY (business rules)<br/>from DETAILS (deferrable)"]
+
+    style BA fill:#2e7d32,stroke:#a5d6a7,color:#fff,stroke-width:3px
+    style C fill:#2e7d32,stroke:#a5d6a7,color:#fff,stroke-width:2px
+    style O fill:#2e7d32,stroke:#a5d6a7,color:#fff,stroke-width:2px
+    style S fill:#6a1b9a,stroke:#ce93d8,color:#fff,stroke-width:2px
 ```
 
 ## Documentos de este tópico

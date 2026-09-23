@@ -72,11 +72,11 @@ La UI/controlador solo puede hablar con `ReservasComponent`; no puede alcanzar e
 flowchart LR
     subgraph Layer["Package by LAYER"]
         direction TB
-        C1[controllers] --> S1[services] --> R1[repositories]
+        C1["⚙️ controllers"] --> S1[services] --> R1["🗄️ repositories"]
     end
     subgraph Feature["Package by FEATURE"]
         direction TB
-        F1[reservas] 
+        F1["🧠 reservas"]
         F2[clientes]
         F3[facturacion]
     end
@@ -84,8 +84,16 @@ flowchart LR
         direction TB
         K1["reservas<br/>(fachada pública)"] --> KI1["internal<br/>(oculto)"]
     end
-    Layer -->|el dominio se pierde| Feature
-    Feature -->|fronteras débiles| Component
+    Layer ==>|el dominio se pierde| Feature
+    Feature ==>|fronteras débiles| Component
+    style C1 fill:#37474f,stroke:#90a4ae,color:#fff,stroke-width:2px
+    style S1 fill:#37474f,stroke:#90a4ae,color:#fff,stroke-width:2px
+    style R1 fill:#37474f,stroke:#90a4ae,color:#fff,stroke-width:2px
+    style F1 fill:#2e7d32,stroke:#a5d6a7,color:#fff,stroke-width:2px
+    style F2 fill:#2e7d32,stroke:#a5d6a7,color:#fff,stroke-width:2px
+    style F3 fill:#2e7d32,stroke:#a5d6a7,color:#fff,stroke-width:2px
+    style K1 fill:#1565c0,stroke:#90caf9,color:#fff,stroke-width:2px
+    style KI1 fill:#6a1b9a,stroke:#ce93d8,color:#fff,stroke-width:2px
 ```
 
 ## Comparación de las tres estrategias

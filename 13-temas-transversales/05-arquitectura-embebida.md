@@ -25,21 +25,31 @@ La solución es la misma que en cualquier arquitectura limpia: trazar una **fron
 
 Con estas capas, la app queda **independiente del hardware y del SO**, y por tanto se puede compilar y **probar fuera del target**, en la máquina de desarrollo.
 
+```mermaid
+flowchart TB
+    SW["🧠 Software<br/>(reglas de negocio, la app)<br/>NO conoce el hardware"]
+    OSAL["🔌 OSAL<br/>(abstraccion del sistema operativo)"]
+    HAL["🔌 HAL<br/>(abstraccion del hardware)<br/>la frontera clave"]
+    FW["⚙️ Firmware<br/>(registros, drivers, pines)"]
+    HW["🔌 Hardware<br/>(el detalle)"]
+
+    FW ==> HAL
+    HAL ==> OSAL
+    OSAL ==> SW
+    HW ==> FW
+
+    class SW nucleo
+    class OSAL iface
+    class HAL iface
+    class FW detalle
+    class HW ext
+    classDef nucleo fill:#2e7d32,stroke:#a5d6a7,color:#fff,stroke-width:2px
+    classDef iface fill:#1565c0,stroke:#90caf9,color:#fff,stroke-width:2px
+    classDef detalle fill:#c62828,stroke:#ff8a80,color:#fff,stroke-width:2px
+    classDef ext fill:#37474f,stroke:#90a4ae,color:#fff,stroke-width:2px
 ```
-   +-------------------------------------------+
-   |   Software (reglas de negocio, la "app")  |  <- NO conoce el hardware
-   +-------------------------------------------+
-   |   OSAL  (abstraccion del sistema oper.)   |
-   +-------------------------------------------+
-   |   HAL   (abstraccion del hardware)        |  <- la frontera clave
-   +-------------------------------------------+
-   |   Firmware (registros, drivers, pines)    |
-   +-------------------------------------------+
-   |   Hardware (el detalle)                   |
-   +-------------------------------------------+
-      Las dependencias apuntan hacia ARRIBA:
-      el firmware conoce la HAL, no al reves
-```
+
+Las dependencias apuntan hacia ARRIBA: el firmware conoce la HAL, no al revés.
 
 ## La app no debe depender del hardware
 
@@ -47,17 +57,27 @@ Igual que en Clean Architecture la base de datos y la UI son detalles, aquí **e
 
 ```mermaid
 flowchart TB
-    App["Software / App\n(independiente del hardware)"]
-    HAL["<<interface>> HAL\n(que hace, no como)"]
-    FW["Firmware\n(como: registros, drivers)"]
-    HW["Hardware\n(el detalle)"]
+    App["🧠 Software / App<br/>(independiente del hardware)"]
+    HAL["🔌 &lt;&lt;interface&gt;&gt; HAL<br/>(que hace, no como)"]
+    FW["⚙️ Firmware<br/>(como: registros, drivers)"]
+    HW["🔌 Hardware<br/>(el detalle)"]
 
-    App --> HAL
+    App ==> HAL
     FW -. implementa .-> HAL
-    FW --> HW
-    Test["Tests fuera del target"] -.-> App
-    Nota["Cambiar de chip -> cambia el firmware,\nla app permanece intacta"]:::n
-    classDef n fill:#efe,stroke:#8a8,color:#242;
+    FW ==> HW
+    Test["✅ Tests fuera del target"] -.-> App
+    Nota["🔄 Cambiar de chip cambia el firmware,<br/>la app permanece intacta"]:::nota
+
+    class App nucleo
+    class HAL iface
+    class FW detalle
+    class HW ext
+    class Test nucleo
+    classDef nucleo fill:#2e7d32,stroke:#a5d6a7,color:#fff,stroke-width:2px
+    classDef iface fill:#1565c0,stroke:#90caf9,color:#fff,stroke-width:2px
+    classDef detalle fill:#c62828,stroke:#ff8a80,color:#fff,stroke-width:2px
+    classDef ext fill:#37474f,stroke:#90a4ae,color:#fff,stroke-width:2px
+    classDef nota fill:#1565c0,stroke:#90caf9,color:#fff,stroke-width:2px
 ```
 
 Beneficios directos de separar software y firmware con una HAL/OSAL:

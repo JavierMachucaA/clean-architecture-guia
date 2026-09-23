@@ -15,45 +15,39 @@ El sistema necesita datos organizados; **no** necesita, en cambio, un motor conc
 
 Desde el punto de vista del núcleo, la persistencia se reduce a "guardar" y "recuperar" datos. La implementación puede variar sin que el negocio se entere:
 
+```mermaid
+flowchart TD
+    CORE["🧠 Business rules (core)<br/>Entities + Use cases<br/>depends on an interface"]
+    PORT["📦 «interface»<br/>OrderRepository<br/>save(order) · findById(id)"]
+    SQL["🗄️ SQL (Postgres)<br/>implementation"]
+    FILE["🗄️ Files<br/>implementation"]
+    CLOUD["🗄️ Cloud store<br/>implementation"]
+    CORE ==> PORT
+    SQL -. implements .-> PORT
+    FILE -. implements .-> PORT
+    CLOUD -. implements .-> PORT
+    style CORE fill:#2e7d32,stroke:#a5d6a7,color:#fff,stroke-width:3px
+    style PORT fill:#1565c0,stroke:#90caf9,color:#fff,stroke-width:2px
+    style SQL fill:#c62828,stroke:#ff8a80,color:#fff,stroke-width:2px
+    style FILE fill:#c62828,stroke:#ff8a80,color:#fff,stroke-width:2px
+    style CLOUD fill:#c62828,stroke:#ff8a80,color:#fff,stroke-width:2px
 ```
-             +----------------------------------+
-             |   Reglas de negocio (núcleo)     |
-             |   - Entidades                    |
-             |   - Casos de uso                 |
-             |                                  |
-             |   Depende de una interfaz:       |
-             |   +--------------------------+   |
-             |   |  RepositorioDePedidos     |  |
-             |   |  guardar(pedido)          |  |
-             |   |  buscarPorId(id)          |  |
-             |   +------------+-------------+   |
-             +----------------|-----------------+
-                              | (implementado por...)
-        +---------------------+---------------------+
-        |                     |                     |
-        v                     v                     v
-+---------------+     +---------------+     +----------------+
-|  SQL (Postgres)|     |  Archivos     |     |  Almacén cloud |
-|  implementación|     |  implementación|    |  implementación|
-+---------------+     +---------------+     +----------------+
-        ^                     ^                     ^
-        |     Todos son intercambiables: DETALLES   |
-        +-------------------------------------------+
-```
+
+Todas las implementaciones son intercambiables: son detalles.
 
 La dirección de dependencia es clave: el núcleo define **qué** necesita (la interfaz del repositorio) y los detalles proveen el **cómo**.
 
 ```mermaid
 flowchart TD
-    UC["Caso de uso<br/>(regla de negocio)"] --> PORT["«interfaz»<br/>RepositorioDePedidos"]
-    SQL["Adaptador SQL"] -. implementa .-> PORT
-    FILE["Adaptador de archivos"] -. implementa .-> PORT
-    CLOUD["Adaptador cloud"] -. implementa .-> PORT
-    style UC fill:#dff0d8,stroke:#3c763d
-    style PORT fill:#fcf8e3,stroke:#8a6d3b
-    style SQL fill:#f2dede,stroke:#a94442
-    style FILE fill:#f2dede,stroke:#a94442
-    style CLOUD fill:#f2dede,stroke:#a94442
+    UC["🧠 Use case<br/>(business rule)"] ==> PORT["📦 «interface»<br/>OrderRepository"]
+    SQL["🔄 SQL adapter"] -. implements .-> PORT
+    FILE["🔄 File adapter"] -. implements .-> PORT
+    CLOUD["🔄 Cloud adapter"] -. implements .-> PORT
+    style UC fill:#2e7d32,stroke:#a5d6a7,color:#fff,stroke-width:3px
+    style PORT fill:#1565c0,stroke:#90caf9,color:#fff,stroke-width:2px
+    style SQL fill:#6a1b9a,stroke:#ce93d8,color:#fff,stroke-width:2px
+    style FILE fill:#6a1b9a,stroke:#ce93d8,color:#fff,stroke-width:2px
+    style CLOUD fill:#6a1b9a,stroke:#ce93d8,color:#fff,stroke-width:2px
 ```
 
 ## Las reglas de negocio no deben saber si hay SQL

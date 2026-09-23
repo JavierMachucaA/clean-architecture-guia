@@ -8,27 +8,25 @@ La historia de la computación es un vaivén entre concentrar la lógica en el s
 
 La web no es más que un mecanismo de I/O: recibe datos del usuario, se los entrega al negocio y devuelve al usuario la respuesta que el negocio produce. El corazón del sistema no debería notar la diferencia entre recibir esos datos por HTTP, por una terminal de texto, por una app móvil o por una llamada a una API.
 
+```mermaid
+flowchart LR
+    WEB["🌐 Browser / HTTP"]
+    ADAP["🔄 Web adapter<br/>(controller)<br/>translates to business language"]
+    UC["🧠 Use case<br/>(business rule)"]
+    CLI["🖥️ CLI / terminal"]
+    MOBILE["📱 Mobile app / API"]
+    WEB ==> ADAP
+    ADAP ==> UC
+    CLI ==> UC
+    MOBILE ==> UC
+    style WEB fill:#37474f,stroke:#90a4ae,color:#fff,stroke-width:2px
+    style ADAP fill:#6a1b9a,stroke:#ce93d8,color:#fff,stroke-width:2px
+    style UC fill:#2e7d32,stroke:#a5d6a7,color:#fff,stroke-width:3px
+    style CLI fill:#37474f,stroke:#90a4ae,color:#fff,stroke-width:2px
+    style MOBILE fill:#37474f,stroke:#90a4ae,color:#fff,stroke-width:2px
 ```
-   +----------+     petición      +------------------+
-   | Navegador| ----------------> |   Adaptador web   |
-   |  / HTTP  | <---------------- |  (controlador)    |
-   +----------+     respuesta      +---------+--------+
-                                             | traduce a lenguaje
-                                             | del negocio
-                                             v
-                                   +------------------+
-                                   |    Caso de uso    |
-                                   |  (regla negocio)  |
-                                   +---------+--------+
-                                             ^
-        +----------------------+             |
-        |   CLI / terminal     | ------------+  (mismo caso de uso)
-        +----------------------+             |
-        +----------------------+             |
-        |   App móvil / API    | ------------+
-        +----------------------+
-   La web es UNA fuente de I/O entre varias: todas son DETALLES.
-```
+
+La web es una fuente de I/O entre varias (CLI, app móvil, API): todas son detalles y todas apuntan hacia el mismo caso de uso.
 
 ## El negocio no debe atarse a HTTP
 
@@ -37,20 +35,23 @@ Si un caso de uso recibe directamente objetos `HttpServletRequest`, lee cabecera
 ```mermaid
 flowchart LR
     subgraph EXT["Anillo externo (detalles)"]
-      WEB["Controlador HTTP"]
-      CLI["Comando CLI"]
-      MOBILE["API móvil"]
+      WEB["🌐 HTTP controller"]
+      CLI["🖥️ CLI command"]
+      MOBILE["📱 Mobile API"]
     end
     subgraph CORE["Núcleo (políticas)"]
-      UC["Caso de uso"]
-      ENT["Entidades"]
+      UC["⚙️ Use case"]
+      ENT["🧠 Entities"]
     end
-    WEB --> UC
-    CLI --> UC
-    MOBILE --> UC
-    UC --> ENT
-    style CORE fill:#dff0d8,stroke:#3c763d
-    style EXT fill:#f2dede,stroke:#a94442
+    WEB ==> UC
+    CLI ==> UC
+    MOBILE ==> UC
+    UC ==> ENT
+    style WEB fill:#37474f,stroke:#90a4ae,color:#fff,stroke-width:2px
+    style CLI fill:#37474f,stroke:#90a4ae,color:#fff,stroke-width:2px
+    style MOBILE fill:#37474f,stroke:#90a4ae,color:#fff,stroke-width:2px
+    style UC fill:#2e7d32,stroke:#a5d6a7,color:#fff,stroke-width:3px
+    style ENT fill:#f9a825,stroke:#f57f17,color:#000,stroke-width:2px
 ```
 
 Las flechas apuntan hacia adentro: los canales dependen del caso de uso, nunca al revés.

@@ -15,22 +15,28 @@ Robert C. Martin sostiene que **esta separación es una ilusión**. No hay una l
 
 ```mermaid
 flowchart LR
-    A["Decisiones de<br/>ALTO nivel<br/>(estructura, módulos,<br/>límites)"] <--> B["Decisiones<br/>intermedias<br/>(clases, interfaces,<br/>colaboraciones)"]
-    B <--> C["Decisiones de<br/>BAJO nivel<br/>(funciones, nombres,<br/>líneas de código)"]
+    A["🧠 High-level decisions<br/>(structure, modules,<br/>boundaries)"] <==> B["⚙️ Mid-level decisions<br/>(classes, interfaces,<br/>collaborations)"]
+    B <==> C["🔧 Low-level decisions<br/>(functions, names,<br/>lines of code)"]
 
-    A -.mismo tejido.- C
+    A -.same fabric.- C
+
+    style A fill:#2e7d32,stroke:#a5d6a7,color:#fff,stroke-width:3px
+    style B fill:#1565c0,stroke:#90caf9,color:#fff,stroke-width:2px
+    style C fill:#37474f,stroke:#90a4ae,color:#fff,stroke-width:2px
 ```
 
 No existe un punto donde puedas decir "aquí termina la arquitectura y empieza el diseño". Es como una casa:
 
-```
-   Arquitectura              Diseño
-   (planos, estructura)      (acabados, cableado, tuberías)
-        │                          │
-        └──────────┬───────────────┘
-                   ▼
-        Si el detalle está mal hecho,
-        la "buena estructura" no sirve de nada.
+```mermaid
+flowchart TD
+    ARCH["🧠 Architecture<br/>(blueprints, structure)"] ==> JOIN["Same whole"]
+    DESIGN["🔧 Design<br/>(finishes, wiring, plumbing)"] ==> JOIN
+    JOIN ==> RESULT["⛔ If the detail is done badly,<br/>the 'good structure' is worthless"]
+
+    style ARCH fill:#2e7d32,stroke:#a5d6a7,color:#fff,stroke-width:2px
+    style DESIGN fill:#37474f,stroke:#90a4ae,color:#fff,stroke-width:2px
+    style JOIN fill:#1565c0,stroke:#90caf9,color:#fff,stroke-width:2px
+    style RESULT fill:#c62828,stroke:#ff8a80,color:#fff,stroke-width:2px
 ```
 
 ## La analogía de la casa

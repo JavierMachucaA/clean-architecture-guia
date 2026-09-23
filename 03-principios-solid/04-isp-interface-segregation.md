@@ -12,10 +12,15 @@ Imagina una clase `OPS` con tres operaciones, usada por tres usuarios distintos:
 
 ```mermaid
 flowchart TD
-    U1["Usuario 1"] --> OPS
-    U2["Usuario 2"] --> OPS
-    U3["Usuario 3"] --> OPS
-    OPS["OPS<br/>op1()  op2()  op3()"]
+    U1["User1"] ==> OPS
+    U2["User2"] ==> OPS
+    U3["User3"] ==> OPS
+    OPS["⛔ OPS<br/>op1()  op2()  op3()"]
+
+    style U1 fill:#37474f,stroke:#90a4ae,color:#fff,stroke-width:2px
+    style U2 fill:#37474f,stroke:#90a4ae,color:#fff,stroke-width:2px
+    style U3 fill:#37474f,stroke:#90a4ae,color:#fff,stroke-width:2px
+    style OPS fill:#c62828,stroke:#ff8a80,color:#fff,stroke-width:3px
 ```
 
 - El **Usuario 1** solo usa `op1()`.
@@ -24,11 +29,20 @@ flowchart TD
 
 Aun así, los tres dependen de **toda** la clase `OPS`. Si cambia `op2()` (que solo interesa al Usuario 2), en muchos lenguajes hay que **recompilar y redesplegar** también al Usuario 1 y al Usuario 3, aunque su código no cambió.
 
+```mermaid
+flowchart LR
+    U1["User1"] ==> OPS
+    U2["User2"] ==> OPS
+    U3["User3"] ==> OPS
+    OPS["⛔ OPS<br/>op1  op2  op3"]
+
+    style U1 fill:#37474f,stroke:#90a4ae,color:#fff,stroke-width:2px
+    style U2 fill:#37474f,stroke:#90a4ae,color:#fff,stroke-width:2px
+    style U3 fill:#37474f,stroke:#90a4ae,color:#fff,stroke-width:2px
+    style OPS fill:#c62828,stroke:#ff8a80,color:#fff,stroke-width:3px
 ```
-   Usuario1 ──┐
-   Usuario2 ──┼──► [ OPS: op1 op2 op3 ]   ❌ todos atados a todo
-   Usuario3 ──┘
-```
+
+Todos atados a todo: cualquier cambio en `OPS` arrastra a los tres usuarios.
 
 ## La solución: segregar por cliente
 
@@ -36,13 +50,21 @@ Se crean interfaces separadas, una por necesidad, y cada usuario depende solo de
 
 ```mermaid
 flowchart TD
-    U1["Usuario 1"] --> I1["«interface» U1Ops<br/>op1()"]
-    U2["Usuario 2"] --> I2["«interface» U2Ops<br/>op2()"]
-    U3["Usuario 3"] --> I3["«interface» U3Ops<br/>op3()"]
+    U1["User1"] ==> I1["📦 «interface» U1Ops<br/>op1()"]
+    U2["User2"] ==> I2["📦 «interface» U2Ops<br/>op2()"]
+    U3["User3"] ==> I3["📦 «interface» U3Ops<br/>op3()"]
 
-    I1 --> OPS["OPS"]
-    I2 --> OPS
-    I3 --> OPS
+    I1 ==> OPS["⚙️ OPS"]
+    I2 ==> OPS
+    I3 ==> OPS
+
+    style U1 fill:#37474f,stroke:#90a4ae,color:#fff,stroke-width:2px
+    style U2 fill:#37474f,stroke:#90a4ae,color:#fff,stroke-width:2px
+    style U3 fill:#37474f,stroke:#90a4ae,color:#fff,stroke-width:2px
+    style I1 fill:#1565c0,stroke:#90caf9,color:#fff,stroke-width:2px
+    style I2 fill:#1565c0,stroke:#90caf9,color:#fff,stroke-width:2px
+    style I3 fill:#1565c0,stroke:#90caf9,color:#fff,stroke-width:2px
+    style OPS fill:#2e7d32,stroke:#a5d6a7,color:#fff,stroke-width:3px
 ```
 
 Ahora un cambio en `op2()` solo afecta a `U2Ops` y al Usuario 2. Los demás quedan aislados.
@@ -62,8 +84,13 @@ Uncle Bob hace una observación importante sobre el **alcance** del problema:
 
 Depender de un módulo que contiene más de lo que necesitas es dañino aunque nunca uses lo extra:
 
-```
-   Sistema S  ──►  Framework F  ──►  Base de datos D
+```mermaid
+flowchart LR
+    S["⚙️ System S"] ==> F["🚫 Framework F"] ==> D["🗄️ Database D"]
+
+    style S fill:#2e7d32,stroke:#a5d6a7,color:#fff,stroke-width:2px
+    style F fill:#37474f,stroke:#90a4ae,color:#fff,stroke-width:2px
+    style D fill:#c62828,stroke:#ff8a80,color:#fff,stroke-width:2px
 ```
 
 Si `S` no usa una función de `F`, pero `F` la necesita por causa de `D`, entonces un cambio en `D` puede forzar redeploy de `F` y, en cascada, de `S`. **Se depende de cosas innecesarias que traen problemas.**
@@ -73,28 +100,28 @@ Si `S` no usa una función de `F`, pero `F` la necesita por causa de `D`, entonc
 ### ❌ Mal aplicado — una interfaz para todos
 
 ```
-interface Trabajador {
-    trabajar()
-    comer()      // un robot no come, pero debe implementarlo igual
+interface Worker {
+    work()
+    eat()        // a robot does not eat, but must implement it anyway
 }
 
-class RobotDeFabrica implements Trabajador {
-    trabajar() { ... }
-    comer()    { throw "no aplica" }   // método inútil forzado
+class FactoryRobot implements Worker {
+    work() { ... }
+    eat()  { throw "not applicable" }   // useless forced method
 }
 ```
 
 ### ✅ Bien aplicado — interfaces segregadas
 
 ```
-interface Trabajable { trabajar() }
-interface Alimentable { comer() }
+interface Workable { work() }
+interface Feedable  { eat() }
 
-class Humano implements Trabajable, Alimentable { trabajar(); comer() }
-class RobotDeFabrica implements Trabajable       { trabajar() }
+class Human implements Workable, Feedable { work(); eat() }
+class FactoryRobot implements Workable    { work() }
 ```
 
-Cada cliente depende **solo** de lo que usa. El robot ya no carga con `comer()`.
+Cada cliente depende **solo** de lo que usa. El robot ya no carga con `eat()`.
 
 ## Punto clave para recordar
 

@@ -15,36 +15,34 @@ Son enfoques opuestos y complementarios. El código orientado a objetos facilita
 
 Una base de datos relacional almacena **datos** en filas y columnas y los pone a disposición de cualquiera que sepa consultarlos. No encapsula comportamiento: expone estructura. Eso está bien para su propósito (almacenar y consultar), pero es exactamente lo contrario de lo que hace un objeto de negocio.
 
+```mermaid
+flowchart LR
+    OBJ["🧠 Object (business): Order<br/>[hidden data]<br/>+ confirm() · + cancel() · + total()<br/>exposes BEHAVIOR"]
+    REL[("🗄️ Relational table (persistence): orders<br/>id · customer · total · status<br/>rows visible to any query<br/>exposes DATA (visible structure)")]
+    OBJ -. opposite of .-> REL
+    style OBJ fill:#f9a825,stroke:#f57f17,color:#000,stroke-width:2px
+    style REL fill:#37474f,stroke:#90a4ae,color:#fff,stroke-width:2px
 ```
-   OBJETO (negocio)                    TABLA RELACIONAL (persistencia)
-  +----------------------+            +-------------------------------+
-  |  Pedido              |            |  pedidos                       |
-  |----------------------|            |-------------------------------|
-  |  [datos ocultos]     |            |  id | cliente | total | estado |
-  |----------------------|            |-----|---------|-------|--------|
-  |  + confirmar()       |            |  1  |   A     |  99   | PEND   |
-  |  + cancelar()        |            |  2  |   B     |  40   | CONF   |
-  |  + total()           |            +-------------------------------+
-  +----------------------+
-   Expone COMPORTAMIENTO                Expone DATOS (estructura visible)
-```
+
+El objeto de negocio expone comportamiento y oculta sus datos; la tabla relacional expone datos con estructura visible. Son enfoques opuestos.
 
 Si las reglas de negocio manipulan directamente filas y columnas, adoptan la forma de la base de datos: pasan a razonar en términos de estructura relacional en vez de comportamiento. En ese momento el detalle de persistencia se ha filtrado al núcleo.
 
 ```mermaid
 flowchart LR
     subgraph NUCLEO["Núcleo (comportamiento)"]
-      OBJ["Objetos de negocio<br/>ocultan datos<br/>exponen métodos"]
+      OBJ["🧠 Business objects<br/>hide data<br/>expose methods"]
     end
     subgraph BORDE["Borde (datos)"]
-      MAP["Mapeador / repositorio"]
-      REL[("Tablas relacionales<br/>exponen datos")]
+      MAP["🔄 Mapper / repository"]
+      REL[("🗄️ Relational tables<br/>expose data")]
     end
-    OBJ --> MAP
-    MAP --> REL
-    REL -. nunca dicta la forma de .-> OBJ
-    style NUCLEO fill:#dff0d8,stroke:#3c763d
-    style BORDE fill:#f2dede,stroke:#a94442
+    OBJ ==> MAP
+    MAP ==> REL
+    REL -. 🚫 never dictates the shape of .-> OBJ
+    style OBJ fill:#f9a825,stroke:#f57f17,color:#000,stroke-width:2px
+    style MAP fill:#6a1b9a,stroke:#ce93d8,color:#fff,stroke-width:2px
+    style REL fill:#37474f,stroke:#90a4ae,color:#fff,stroke-width:2px
 ```
 
 | Criterio | Objeto (OO) | Estructura de datos / tabla relacional |

@@ -11,9 +11,17 @@ Antes de hablar de círculos, capas, SOLID o boundaries, Uncle Bob dedica el pri
 
 La respuesta corta: porque el objetivo de la arquitectura de software es **minimizar el esfuerzo humano necesario para construir y mantener el sistema**. Todo lo demás (patrones, principios, diagramas) son medios para ese fin.
 
-```
-   Mala arquitectura  ─────►  cada feature cuesta más que la anterior  ─────►  el equipo se frena
-   Buena arquitectura ─────►  el costo por feature se mantiene estable  ─────►  el equipo avanza
+```mermaid
+flowchart LR
+    BAD["🚫 Bad architecture"] ==> BAD1["Each feature costs<br/>more than the previous one"] ==> BAD2["The team grinds to a halt"]
+    GOOD["✅ Good architecture"] ==> GOOD1["Cost per feature<br/>stays stable"] ==> GOOD2["The team keeps moving"]
+
+    style BAD fill:#c62828,stroke:#ff8a80,color:#fff,stroke-width:3px
+    style BAD1 fill:#c62828,stroke:#ff8a80,color:#fff,stroke-width:2px
+    style BAD2 fill:#37474f,stroke:#90a4ae,color:#fff,stroke-width:2px
+    style GOOD fill:#2e7d32,stroke:#a5d6a7,color:#fff,stroke-width:3px
+    style GOOD1 fill:#2e7d32,stroke:#a5d6a7,color:#fff,stroke-width:2px
+    style GOOD2 fill:#37474f,stroke:#90a4ae,color:#fff,stroke-width:2px
 ```
 
 ## Documentos de este tópico
@@ -29,23 +37,45 @@ La respuesta corta: porque el objetivo de la arquitectura de software es **minim
 ## Diagrama del tópico
 
 ```mermaid
-mindmap
-  root((Introducción<br/>y visión general))
-    Diseño = Arquitectura
-      Mismo objetivo
-      Solo cambia el nivel de detalle
-    Objetivo
-      Minimizar esfuerzo humano
-      Bajo costo por comportamiento
-    Caso de estudio
-      Productividad cae con el desorden
-      Costo por línea sube
-    Comportamiento vs Estructura
-      Urgente vs Importante
-      "Funciona" no basta
-    La lucha
-      Devs vs Managers
-      Defender la estructura
+flowchart TD
+    ROOT["🧠 Introducción<br/>y visión general"]
+
+    ROOT ==> A["Diseño = Arquitectura"]
+    A ==> A1["Mismo objetivo"]
+    A ==> A2["Solo cambia el nivel de detalle"]
+
+    ROOT ==> B["Objetivo"]
+    B ==> B1["Minimizar esfuerzo humano"]
+    B ==> B2["Bajo costo por comportamiento"]
+
+    ROOT ==> C["Caso de estudio"]
+    C ==> C1["Productividad cae con el desorden"]
+    C ==> C2["Costo por línea sube"]
+
+    ROOT ==> D["Comportamiento vs Estructura"]
+    D ==> D1["Urgente vs Importante"]
+    D ==> D2["'Funciona' no basta"]
+
+    ROOT ==> E["La lucha"]
+    E ==> E1["Devs vs Managers"]
+    E ==> E2["Defender la estructura"]
+
+    style ROOT fill:#2e7d32,stroke:#a5d6a7,color:#fff,stroke-width:3px
+    style A fill:#1565c0,stroke:#90caf9,color:#fff,stroke-width:2px
+    style B fill:#1565c0,stroke:#90caf9,color:#fff,stroke-width:2px
+    style C fill:#1565c0,stroke:#90caf9,color:#fff,stroke-width:2px
+    style D fill:#1565c0,stroke:#90caf9,color:#fff,stroke-width:2px
+    style E fill:#1565c0,stroke:#90caf9,color:#fff,stroke-width:2px
+    style A1 fill:#37474f,stroke:#90a4ae,color:#fff,stroke-width:2px
+    style A2 fill:#37474f,stroke:#90a4ae,color:#fff,stroke-width:2px
+    style B1 fill:#37474f,stroke:#90a4ae,color:#fff,stroke-width:2px
+    style B2 fill:#37474f,stroke:#90a4ae,color:#fff,stroke-width:2px
+    style C1 fill:#37474f,stroke:#90a4ae,color:#fff,stroke-width:2px
+    style C2 fill:#37474f,stroke:#90a4ae,color:#fff,stroke-width:2px
+    style D1 fill:#37474f,stroke:#90a4ae,color:#fff,stroke-width:2px
+    style D2 fill:#37474f,stroke:#90a4ae,color:#fff,stroke-width:2px
+    style E1 fill:#37474f,stroke:#90a4ae,color:#fff,stroke-width:2px
+    style E2 fill:#37474f,stroke:#90a4ae,color:#fff,stroke-width:2px
 ```
 
 ## Cómo leer este tópico

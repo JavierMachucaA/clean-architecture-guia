@@ -8,16 +8,14 @@ En el libro, Robert C. Martin presenta datos de una empresa real (anonimizada) p
 
 A lo largo de sucesivas *releases*, el número de ingenieros crece de forma sostenida. Uno esperaría que más gente produjera más. Ocurre lo contrario:
 
-```
-Ingenieros                          Productividad (líneas útiles por release)
-  ▲                                   ▲
-  │              ╱                     │  ●
-  │           ╱                        │     ●
-  │        ╱                           │        ●
-  │     ╱                              │           ●
-  │  ╱                                 │              ●   ●   ●
-  └──────────────────► release         └──────────────────────► release
-  (sube y sube)                        (baja hacia casi cero)
+```mermaid
+flowchart LR
+    REL["📅 Release after release"] ==> ENG["📈 Engineers<br/>(keeps rising)"]
+    REL ==> PROD["📉 Productivity<br/>(useful lines per release,<br/>drops toward zero)"]
+
+    style REL fill:#1565c0,stroke:#90caf9,color:#fff,stroke-width:2px
+    style ENG fill:#37474f,stroke:#90a4ae,color:#fff,stroke-width:2px
+    style PROD fill:#c62828,stroke:#ff8a80,color:#fff,stroke-width:2px
 ```
 
 Más personas, pero cada release entrega menos valor. La productividad tiende asintóticamente a cero.
@@ -26,18 +24,12 @@ Más personas, pero cada release entrega menos valor. La productividad tiende as
 
 Cuando se mira el **costo por línea de código** entre releases, la curva sube de forma explosiva:
 
-```
-Costo por
-línea
-  ▲
-  │                                     ●
-  │                                  ╱
-  │                              ╱
-  │                          ╱
-  │                     ╱
-  │             ╱
-  │  ● ● ● ●
-  └────────────────────────────────────►  release
+```mermaid
+flowchart LR
+    R["📅 Release"] ==> COST["📈 Cost per line of code<br/>(flat at first, then explodes<br/>to 20x-40x)"]
+
+    style R fill:#1565c0,stroke:#90caf9,color:#fff,stroke-width:2px
+    style COST fill:#c62828,stroke:#ff8a80,color:#fff,stroke-width:3px
 ```
 
 Lo que en la primera release costaba una unidad, releases más tarde puede costar 20, 40 veces más. El negocio paga cada vez más por cada vez menos.
@@ -46,13 +38,21 @@ Lo que en la primera release costaba una unidad, releases más tarde puede costa
 
 ```mermaid
 flowchart TD
-    P["Presión por entregar rápido"] --> M["Se sacrifica la estructura<br/>(código sucio)"]
-    M --> D["El sistema es más difícil de entender y cambiar"]
-    D --> L["Cada cambio tarda más y rompe cosas"]
-    L --> P2["Más presión y prisa"]
-    P2 --> M
-    L --> C["Sube el costo por feature"]
-    D --> B["Más bugs y retrabajo"]
+    P["⚙️ Pressure to deliver fast"] ==> M["🚫 Structure is sacrificed<br/>(dirty code)"]
+    M ==> D["The system gets harder to understand and change"]
+    D ==> L["Each change takes longer and breaks things"]
+    L ==> P2["More pressure and rush"]
+    P2 ==> M
+    L ==> C["📈 Cost per feature rises"]
+    D ==> B["⛔ More bugs and rework"]
+
+    style P fill:#37474f,stroke:#90a4ae,color:#fff,stroke-width:2px
+    style M fill:#c62828,stroke:#ff8a80,color:#fff,stroke-width:2px
+    style D fill:#37474f,stroke:#90a4ae,color:#fff,stroke-width:2px
+    style L fill:#37474f,stroke:#90a4ae,color:#fff,stroke-width:2px
+    style P2 fill:#c62828,stroke:#ff8a80,color:#fff,stroke-width:2px
+    style C fill:#c62828,stroke:#ff8a80,color:#fff,stroke-width:2px
+    style B fill:#c62828,stroke:#ff8a80,color:#fff,stroke-width:2px
 ```
 
 Es un **ciclo que se retroalimenta**: la prisa genera desorden, el desorden genera lentitud, la lentitud genera más prisa.

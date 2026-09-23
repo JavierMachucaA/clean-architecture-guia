@@ -12,9 +12,14 @@ Cuando la arquitectura es buena, el costo por línea, por feature y por cambio s
 
 ```mermaid
 flowchart LR
-    F["Forma del sistema<br/>(componentes + vías de comunicación)"] --> O["Objetivo económico"]
-    O --> M["Minimizar el esfuerzo humano<br/>en todo el ciclo de vida"]
-    M --> C["Mantener bajo el costo<br/>y alta la productividad"]
+    F["📦 System shape<br/>(components + communication paths)"] ==> O["⚙️ Economic goal"]
+    O ==> M["🧠 Minimize human effort<br/>across the whole lifecycle"]
+    M ==> C["✅ Keep cost low<br/>and productivity high"]
+
+    style F fill:#1565c0,stroke:#90caf9,color:#fff,stroke-width:2px
+    style O fill:#37474f,stroke:#90a4ae,color:#fff,stroke-width:2px
+    style M fill:#2e7d32,stroke:#a5d6a7,color:#fff,stroke-width:3px
+    style C fill:#2e7d32,stroke:#a5d6a7,color:#fff,stroke-width:2px
 ```
 
 ## El arquitecto sigue programando
@@ -32,28 +37,19 @@ La arquitectura da soporte al ciclo de vida del sistema. Ese soporte se mide en 
 | **Operación** | Que el sistema haga lo que debe; la arquitectura comunica las necesidades operativas a los desarrolladores |
 | **Mantenimiento** | Que localizar y arreglar problemas, y agregar features, cueste poco; es la fase más cara de todas |
 
-```
-        CICLO DE VIDA DEL SISTEMA
-        =========================
+```mermaid
+flowchart TB
+    DEV["⚙️ Development<br/>teams in parallel"] ==> ARCH
+    DEPLOY["📦 Deployment<br/>single simple act"] ==> ARCH
+    ARCH["🧠 Architecture<br/>(supports the 4 phases)"]
+    OPS["🖥️ Operation<br/>does what it must"] ==> ARCH
+    MAINT["🗄️ Maintenance<br/>the MOST costly phase"] ==> ARCH
 
-   ┌──────────────┐   ┌──────────────┐
-   │ DESARROLLO   │   │  DESPLIEGUE  │
-   │ equipos en   │   │ un solo acto │
-   │ paralelo     │   │ sencillo     │
-   └──────┬───────┘   └──────┬───────┘
-          │                  │
-          ▼                  ▼
-   ┌───────────────────────────────┐
-   │        ARQUITECTURA            │
-   │   (da soporte a las 4 fases)   │
-   └───────────────────────────────┘
-          ▲                  ▲
-          │                  │
-   ┌──────┴───────┐   ┌──────┴───────┐
-   │  OPERACIÓN   │   │ MANTENIMIENTO│
-   │ hace lo que  │   │ la fase MÁS  │
-   │ debe hacer   │   │ cara: bajarla│
-   └──────────────┘   └──────────────┘
+    style DEV fill:#1565c0,stroke:#90caf9,color:#fff,stroke-width:2px
+    style DEPLOY fill:#1565c0,stroke:#90caf9,color:#fff,stroke-width:2px
+    style ARCH fill:#2e7d32,stroke:#a5d6a7,color:#fff,stroke-width:3px
+    style OPS fill:#37474f,stroke:#90a4ae,color:#fff,stroke-width:2px
+    style MAINT fill:#c62828,stroke:#ff8a80,color:#fff,stroke-width:2px
 ```
 
 ## Operación vs las otras tres

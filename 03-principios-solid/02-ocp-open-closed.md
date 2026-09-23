@@ -16,16 +16,22 @@ Uncle Bob replantea OCP a nivel arquitectónico. No se trata solo de no tocar c�
 
 ```mermaid
 flowchart TD
-    UC["Interactor / Reglas de negocio<br/>(ALTO NIVEL — protegido)"]
-    P["Presenter"]
-    V["View"]
-    C["Controller"]
-    DB["Base de datos<br/>(BAJO NIVEL — volátil)"]
+    UC["🧠 Interactor / Business Rules<br/>(HIGH LEVEL — protected)"]
+    P["🔄 Presenter"]
+    V["🖥️ View"]
+    C["🔄 Controller"]
+    DB["🗄️ Database<br/>(LOW LEVEL — volatile)"]
 
-    C -->|depende de| UC
-    P -->|depende de| UC
-    V -->|depende de| P
-    DB -->|depende de| UC
+    C ==>|depends on| UC
+    P ==>|depends on| UC
+    V ==>|depends on| P
+    DB ==>|depends on| UC
+
+    style UC fill:#2e7d32,stroke:#a5d6a7,color:#fff,stroke-width:3px
+    style P fill:#6a1b9a,stroke:#ce93d8,color:#fff,stroke-width:2px
+    style C fill:#6a1b9a,stroke:#ce93d8,color:#fff,stroke-width:2px
+    style V fill:#37474f,stroke:#90a4ae,color:#fff,stroke-width:2px
+    style DB fill:#37474f,stroke:#90a4ae,color:#fff,stroke-width:2px
 ```
 
 Fíjate que **todas las flechas apuntan hacia el interactor**. El alto nivel no sabe que existen la vista, el presenter ni la base de datos. Puede cambiar cualquier detalle sin tocar la política central.
@@ -37,13 +43,15 @@ OCP se apoya en dos ideas combinadas:
 1. **Inversión de dependencias (DIP):** el alto nivel define una interfaz; el bajo nivel la implementa. La flecha del código apunta *contra* el flujo de datos.
 2. **Ocultamiento de información (ISP y encapsulación):** un componente no debe conocer más de otro de lo estrictamente necesario, así los cambios no se propagan.
 
-```
-     Flujo de datos  ───────────────────►
-   ┌──────────┐      ┌────────────┐      ┌──────────┐
-   │Controller│─────►│ Interactor │◄─────│ Database │
-   └──────────┘      │ <interfaz> │      └──────────┘
-                     └────────────┘
-     Flechas de dependencia del código  ◄──── apuntan al alto nivel
+```mermaid
+flowchart LR
+    C["🔄 Controller"] ==>|code dependency| UC
+    DB["🗄️ Database"] ==>|code dependency| UC
+    UC["🧠 Interactor<br/>«interface»"]
+
+    style C fill:#6a1b9a,stroke:#ce93d8,color:#fff,stroke-width:2px
+    style DB fill:#37474f,stroke:#90a4ae,color:#fff,stroke-width:2px
+    style UC fill:#2e7d32,stroke:#a5d6a7,color:#fff,stroke-width:3px
 ```
 
 Aunque los datos fluyan del controller a la base de datos, **las dependencias del código apuntan al interactor**. Así el interactor queda cerrado a modificación.
@@ -67,10 +75,10 @@ Un sistema debe generar un reporte financiero. Mañana pedirán mostrarlo tambi�
 ### ❌ Mal aplicado — cerrado a extensión
 
 ```
-class GeneradorDeReporte {
-    generar(datos, formato) {
-        if (formato == "web")  { ...html... }
-        if (formato == "pdf")  { ...pdf...  }   // hay que EDITAR la clase
+class ReportGenerator {
+    generate(data, format) {
+        if (format == "web")  { ...html... }
+        if (format == "pdf")  { ...pdf...  }   // must EDIT the class
     }
 }
 ```
@@ -80,18 +88,18 @@ Cada nuevo formato **modifica** una clase existente y probada. Viola OCP.
 ### ✅ Bien aplicado — abierto a extensión
 
 ```
-interface Presentador { presentar(datos) }
+interface Presenter { present(data) }
 
-class PresentadorWeb implements Presentador { presentar(datos){ ...html... } }
-class PresentadorPDF implements Presentador { presentar(datos){ ...pdf...  } }
+class WebPresenter implements Presenter { present(data){ ...html... } }
+class PdfPresenter implements Presenter { present(data){ ...pdf...  } }
 
-class GeneradorDeReporte {
-    constructor(Presentador p)      // depende de la ABSTRACCIÓN
-    generar(datos) { p.presentar(datos) }
+class ReportGenerator {
+    constructor(Presenter p)        // depends on the ABSTRACTION
+    generate(data) { p.present(data) }
 }
 ```
 
-Para un nuevo formato solo se **agrega** una clase nueva. El `GeneradorDeReporte` nunca se toca: está cerrado a modificación, abierto a extensión.
+Para un nuevo formato solo se **agrega** una clase nueva. El `ReportGenerator` nunca se toca: está cerrado a modificación, abierto a extensión.
 
 ## Punto clave para recordar
 

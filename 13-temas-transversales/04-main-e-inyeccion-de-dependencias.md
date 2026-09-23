@@ -26,22 +26,21 @@ Como nada del sistema depende de `Main`, cambiarlo o reemplazarlo no obliga a to
 
 Después de eso, `Main` no vuelve a intervenir. Ha configurado el escenario y sale de la obra.
 
-```
-     Arranque del proceso
-            |
-            v
-    +---------------------------+
-    |          MAIN             |
-    |  crea objetos concretos   |
-    |  inyecta dependencias     |
-    |  configura factories      |
-    +---------------------------+
-            |  entrega el control
-            v
-    +---------------------------+
-    |   Politicas de alto nivel |
-    |   (casos de uso, reglas)  |   <-- ya no saben nada de Main
-    +---------------------------+
+```mermaid
+flowchart TB
+    Start["⚙️ Arranque del proceso"]
+    Main["🟣 MAIN<br/>crea objetos concretos<br/>inyecta dependencias<br/>configura factories"]
+    Pol["🧠 Politicas de alto nivel<br/>(use cases, reglas)<br/>ya no saben nada de Main"]
+
+    Start ==> Main
+    Main ==>|entrega el control| Pol
+
+    class Start iface
+    class Main adapter
+    class Pol nucleo
+    classDef iface fill:#1565c0,stroke:#90caf9,color:#fff,stroke-width:2px
+    classDef adapter fill:#6a1b9a,stroke:#ce93d8,color:#fff,stroke-width:2px
+    classDef nucleo fill:#2e7d32,stroke:#a5d6a7,color:#fff,stroke-width:2px
 ```
 
 ## Inyección de dependencias: Main ensambla
@@ -52,19 +51,28 @@ Así se cumple la **Regla de Dependencia**: las flechas de código fuente apunta
 
 ```mermaid
 flowchart TB
-    Main["Main\n(concreto, bajo nivel)"]
+    Main["🟣 Main<br/>(concreto, bajo nivel)"]
     subgraph App["Aplicacion (alto nivel)"]
-        UC["Caso de uso"]
-        IGW["<<interface>>\nGateway"]
+        UC["⚙️ Use Case"]
+        IGW["🔌 &lt;&lt;interface&gt;&gt;<br/>Gateway"]
     end
-    GWImpl["GatewayMySQL\n(implementacion concreta)"]
+    GWImpl["🗄️ GatewayMySQL<br/>(implementacion concreta)"]
 
-    Main -->|crea e inyecta| GWImpl
-    Main -->|arranca| UC
-    UC --> IGW
+    Main ==>|crea e inyecta| GWImpl
+    Main ==>|arranca| UC
+    UC ==> IGW
     GWImpl -. implementa .-> IGW
-    Nota["Main conoce lo concreto;\nla app solo conoce interfaces"]:::n
-    classDef n fill:#eef,stroke:#88a,color:#224;
+    Nota["🔄 Main conoce lo concreto;<br/>la app solo conoce interfaces"]:::nota
+
+    class Main adapter
+    class UC nucleo
+    class IGW iface
+    class GWImpl detalle
+    classDef adapter fill:#6a1b9a,stroke:#ce93d8,color:#fff,stroke-width:2px
+    classDef nucleo fill:#2e7d32,stroke:#a5d6a7,color:#fff,stroke-width:2px
+    classDef iface fill:#1565c0,stroke:#90caf9,color:#fff,stroke-width:2px
+    classDef detalle fill:#c62828,stroke:#ff8a80,color:#fff,stroke-width:2px
+    classDef nota fill:#1565c0,stroke:#90caf9,color:#fff,stroke-width:2px
 ```
 
 De este modo, para cambiar una base de datos, un servicio externo o incluso todo el entorno, basta con escribir otro `Main` (o configurarlo distinto) sin tocar una sola regla de negocio.

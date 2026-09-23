@@ -10,11 +10,14 @@ Si dejáramos que la misma estructura viajara por todas las capas, la forma del 
 
 ## Una estructura por capa
 
-```
-   Base de datos        Caso de uso          Interfaz (UI)
-   ─────────────        ───────────          ─────────────
-   PedidoRecord    ──►  Pedido (entidad) ──►  PedidoViewModel
-   (columnas SQL)  Map  (reglas de neg.) Map  (textos listos)
+```mermaid
+flowchart LR
+    R["🗄️ OrderRecord<br/>(columnas SQL)"] ==>|Mapper| E["🧠 Order (entidad)<br/>(reglas de negocio)"]
+    E ==>|Mapper| VM["📦 OrderViewModel<br/>(textos listos)"]
+
+    style R fill:#37474f,stroke:#90a4ae,color:#fff,stroke-width:2px
+    style E fill:#2e7d32,stroke:#a5d6a7,color:#fff,stroke-width:2px
+    style VM fill:#1565c0,stroke:#90caf9,color:#fff,stroke-width:2px
 ```
 
 Cada frontera tiene un mapper que convierte de la estructura de una capa a la de la otra. Así los datos entran "traducidos" al idioma de cada capa.
@@ -23,9 +26,13 @@ Cada frontera tiene un mapper que convierte de la estructura de una capa a la de
 
 ```mermaid
 flowchart LR
-    R["PedidoRecord<br/>(capa BD)"] -->|Mapper BD→dominio| E["Pedido<br/>(entidad)"]
-    E -->|Mapper dominio→VM| VM["PedidoViewModel<br/>(capa UI)"]
-    VM -.->|nunca al reves atraviesa| E
+    R["🗄️ OrderRecord<br/>(capa BD)"] ==>|"🔄 Mapper DB→domain"| E["🧠 Order<br/>(entidad)"]
+    E ==>|"🔄 Mapper domain→VM"| VM["📦 OrderViewModel<br/>(capa UI)"]
+    VM -.->|"⛔ nunca al revés atraviesa"| E
+
+    style R fill:#37474f,stroke:#90a4ae,color:#fff,stroke-width:2px
+    style E fill:#2e7d32,stroke:#a5d6a7,color:#fff,stroke-width:2px
+    style VM fill:#1565c0,stroke:#90caf9,color:#fff,stroke-width:2px
 ```
 
 El Mapper copia y transforma campos; **no** contiene reglas de negocio. Es un traductor, no un lugar para esconder lógica.
@@ -35,15 +42,19 @@ El Mapper copia y transforma campos; **no** contiene reglas de negocio. Es un tr
 ```mermaid
 flowchart TD
     subgraph Externa["Detalle (BD / UI)"]
-        REC["Record / DTO / ViewModel"]
-        M["Mapper"]
+        REC["📦 Record / DTO / ViewModel"]
+        M["🔄 Mapper"]
     end
     subgraph Interna["Dominio / casos de uso"]
-        ENT["Entidad"]
+        ENT["🧠 Entity"]
     end
-    M -->|conoce| REC
-    M -->|conoce| ENT
-    ENT -.->|no conoce| REC
+    M ==>|conoce| REC
+    M ==>|conoce| ENT
+    ENT -.->|"⛔ no conoce"| REC
+
+    style REC fill:#1565c0,stroke:#90caf9,color:#fff,stroke-width:2px
+    style M fill:#6a1b9a,stroke:#ce93d8,color:#fff,stroke-width:2px
+    style ENT fill:#2e7d32,stroke:#a5d6a7,color:#fff,stroke-width:2px
 ```
 
 El Mapper vive en la capa externa y conoce **ambas** formas. La entidad interna, en cambio, **no conoce** la estructura externa. Por eso el mapper puede tocar los dos lados sin romper la regla de dependencia.
@@ -63,9 +74,9 @@ Un mismo pedido se ve distinto en cada capa; el mapper hace las conversiones ent
 ❌ La fila de la BD viaja hasta el dominio y lo contamina:
 
 ```java
-class CalcularEnvio {
-    double calcular(ResultSet fila) throws SQLException { // depende de JDBC
-        return fila.getDouble("peso") * TARIFA;           // detalle en el núcleo
+class CalculateShipping {
+    double calculate(ResultSet row) throws SQLException { // depends on JDBC
+        return row.getDouble("weight") * RATE;            // detail in the core
     }
 }
 ```
@@ -73,26 +84,26 @@ class CalcularEnvio {
 ✅ Un mapper traduce a entidad; el dominio ignora la BD:
 
 ```java
-// Mapper en la capa externa
-class PedidoMapper {
-    Pedido aDominio(ResultSet fila) throws SQLException {
-        return new Pedido(
-            fila.getString("id"),
-            fila.getDouble("peso"),
-            Estado.desde(fila.getInt("estado_id"))
+// Mapper in the outer layer
+class OrderMapper {
+    Order toDomain(ResultSet row) throws SQLException {
+        return new Order(
+            row.getString("id"),
+            row.getDouble("weight"),
+            Status.from(row.getInt("status_id"))
         );
     }
 }
 
-// Dominio: limpio, testeable, sin JDBC
-class CalcularEnvio {
-    double calcular(Pedido pedido) {
-        return pedido.getPeso() * TARIFA;
+// Domain: clean, testable, no JDBC
+class CalculateShipping {
+    double calculate(Order order) {
+        return order.getWeight() * RATE;
     }
 }
 ```
 
-El detalle de `ResultSet` se queda en el mapper; el caso de uso solo ve una `Pedido`.
+El detalle de `ResultSet` se queda en el mapper; el caso de uso solo ve un `Order`.
 
 ## Punto clave para recordar
 

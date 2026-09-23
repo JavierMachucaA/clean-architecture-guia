@@ -14,14 +14,19 @@ Piensa en una interfaz `Licencia` con un método `calcularTarifa()`. Dos impleme
 
 ```mermaid
 flowchart TD
-    B["Facturación<br/>(usa Licencia)"]
-    L["«interface» Licencia<br/>calcularTarifa()"]
-    P["LicenciaPersonal"]
-    E["LicenciaEmpresarial"]
+    B["⚙️ Billing<br/>(uses License)"]
+    L["🧠 «interface» License<br/>calcFee()"]
+    P["✅ PersonalLicense"]
+    E["✅ BusinessLicense"]
 
-    B --> L
+    B ==> L
     P -.implementa.-> L
     E -.implementa.-> L
+
+    style B fill:#2e7d32,stroke:#a5d6a7,color:#fff,stroke-width:2px
+    style L fill:#1565c0,stroke:#90caf9,color:#fff,stroke-width:3px
+    style P fill:#6a1b9a,stroke:#ce93d8,color:#fff,stroke-width:2px
+    style E fill:#6a1b9a,stroke:#ce93d8,color:#fff,stroke-width:2px
 ```
 
 La clase `Facturación` funciona con cualquier `Licencia`. Se pueden intercambiar libremente: **LSP se cumple.**
@@ -31,23 +36,23 @@ La clase `Facturación` funciona con cualquier `Licencia`. Se pueden intercambia
 Parece natural decir "un cuadrado ES un rectángulo", así que `Cuadrado` hereda de `Rectángulo`. Pero un `Rectángulo` permite fijar alto y ancho **por separado**, y un `Cuadrado` no.
 
 ```
-   Rectángulo                    Cuadrado (como subtipo)
+   Rectangle                     Square (as a subtype)
    ┌───────────────┐             ┌───────┐
    │               │             │       │
-   │   ancho ≠     │             │ ancho │  al cambiar el ancho,
-   │   alto        │             │ = alto│  ¡el alto cambia solo!
+   │   width  !=   │             │ width │  changing the width
+   │   height      │             │= height│ also changes the height!
    └───────────────┘             └───────┘
-   setAncho / setAlto            setAncho fuerza setAlto  ❌
-   independientes
+   setWidth / setHeight          setWidth forces setHeight  X
+   independent
 ```
 
 El código que usa un `Rectángulo` asume esto:
 
 ```
-r.setAncho(5)
-r.setAlto(4)
-assert(r.area() == 20)   // ✅ con Rectángulo
-                         // ❌ con Cuadrado da 16, porque setAlto(4) cambió el ancho a 4
+r.setWidth(5)
+r.setHeight(4)
+assert(r.area() == 20)   // OK with Rectangle
+                         // FAIL with Square -> 16, because setHeight(4) changed width to 4
 ```
 
 Si le pasas un `Cuadrado` donde se esperaba un `Rectángulo`, **el programa se comporta mal**. El usuario tendría que preguntar "¿de qué tipo eres realmente?", lo que rompe la sustituibilidad.
@@ -69,20 +74,20 @@ Uncle Bob insiste en que LSP se aplica a **cualquier** relación de subtipos: he
 ### ❌ Mal aplicado — el subtipo rompe el contrato
 
 ```
-class Rectangulo { setAncho(w); setAlto(h); area() }
-class Cuadrado extends Rectangulo {
-    setAncho(w){ super.setAncho(w); super.setAlto(w) }   // efecto oculto
-    setAlto(h){  super.setAncho(h); super.setAlto(h) }   // rompe la suposición del cliente
+class Rectangle { setWidth(w); setHeight(h); area() }
+class Square extends Rectangle {
+    setWidth(w){  super.setWidth(w); super.setHeight(w) }   // hidden side effect
+    setHeight(h){ super.setWidth(h); super.setHeight(h) }   // breaks the client's assumption
 }
 ```
 
 ### ✅ Bien aplicado — respetar el contrato del supertipo
 
 ```
-interface Figura { area() }
+interface Shape { area() }
 
-class Rectangulo implements Figura { setAncho(w); setAlto(h); area() }
-class Cuadrado   implements Figura { setLado(l);            area() }
+class Rectangle implements Shape { setWidth(w); setHeight(h); area() }
+class Square    implements Shape { setSide(l);              area() }
 ```
 
 `Cuadrado` y `Rectángulo` ya no fingen ser intercambiables: comparten solo lo que de verdad comparten (`area()`). No hay suposiciones traicionadas.

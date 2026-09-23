@@ -43,15 +43,19 @@ Ahora el propósito es evidente antes de abrir un archivo. El framework, la base
 
 ```mermaid
 flowchart TD
-    subgraph MAL["Grita el framework"]
-        A1[controllers] --- A2[models] --- A3[views]
+    subgraph MAL["🚫 Grita el framework"]
+        A1["⚙️ controllers"] --- A2["📦 models"] --- A3["🖥️ views"]
     end
-    subgraph BIEN["Grita el dominio"]
-        B1[reservas] --- B2[clientes] --- B3[facturacion]
+    subgraph BIEN["✅ Grita el dominio"]
+        B1["🧠 reservas"] --- B2[clientes] --- B3[facturacion]
     end
-    MAL -.->|refactor conceptual| BIEN
-    style MAL stroke:#c0392b
-    style BIEN stroke:#27ae60
+    MAL ==>|refactor conceptual| BIEN
+    style A1 fill:#c62828,stroke:#ff8a80,color:#fff,stroke-width:2px
+    style A2 fill:#c62828,stroke:#ff8a80,color:#fff,stroke-width:2px
+    style A3 fill:#c62828,stroke:#ff8a80,color:#fff,stroke-width:2px
+    style B1 fill:#2e7d32,stroke:#a5d6a7,color:#fff,stroke-width:2px
+    style B2 fill:#2e7d32,stroke:#a5d6a7,color:#fff,stroke-width:2px
+    style B3 fill:#2e7d32,stroke:#a5d6a7,color:#fff,stroke-width:2px
 ```
 
 ## Los casos de uso en el centro
@@ -72,9 +76,9 @@ Un framework es una herramienta útil, pero **casarse** con él contamina toda l
 
 ```mermaid
 flowchart LR
-    UC["Casos de uso<br/>(el corazón)"] --- D["El framework<br/>vive aquí afuera<br/>(detalle enchufable)"]
-    style UC stroke:#2c3e50,stroke-width:3px
-    style D stroke-dasharray: 5 5
+    UC["🧠 Casos de uso<br/>(el corazón)"] --- D["⚙️ El framework<br/>vive aquí afuera<br/>(detalle enchufable)"]
+    style UC fill:#2e7d32,stroke:#a5d6a7,color:#fff,stroke-width:3px
+    style D fill:#37474f,stroke:#90a4ae,color:#fff,stroke-width:2px
 ```
 
 Si tu arquitectura grita el dominio, podrás **posponer** la elección del framework, la base de datos y la web hasta tener suficiente información, y podrás cambiarlos sin reescribir las reglas de negocio.

@@ -6,10 +6,16 @@ Una arquitectura sana debe soportar, a la vez, los casos de uso del sistema, su 
 
 ```mermaid
 flowchart TD
-    A["Buena arquitectura"] --> UC["Casos de uso<br/>(qué hace el sistema)"]
-    A --> OP["Operación<br/>(rendimiento y escala)"]
-    A --> DEV["Desarrollo<br/>(cómo trabajan los equipos)"]
-    A --> DEP["Despliegue<br/>(cómo se pone en producción)"]
+    A["🧠 Good architecture"] ==> UC["⚙️ Use cases<br/>(what the system does)"]
+    A ==> OP["🖥️ Operation<br/>(performance and scale)"]
+    A ==> DEV["📦 Development<br/>(how teams work)"]
+    A ==> DEP["🗄️ Deployment<br/>(how it ships to prod)"]
+
+    style A fill:#2e7d32,stroke:#a5d6a7,color:#fff,stroke-width:3px
+    style UC fill:#1565c0,stroke:#90caf9,color:#fff,stroke-width:2px
+    style OP fill:#37474f,stroke:#90a4ae,color:#fff,stroke-width:2px
+    style DEV fill:#1565c0,stroke:#90caf9,color:#fff,stroke-width:2px
+    style DEP fill:#37474f,stroke:#90a4ae,color:#fff,stroke-width:2px
 ```
 
 ## Independencia de casos de uso
@@ -22,15 +28,15 @@ Además, los casos de uso deben quedar **aislados unos de otros**. Un cambio en 
 
 Si los casos de uso están bien aislados, la arquitectura también admite las necesidades de **operación**. Un caso de uso que debe correr con alto throughput puede colocarse en su propio componente o servicio y escalar por separado, sin arrastrar al resto.
 
-```
-   Caso de uso A (alto tráfico)      Caso de uso B (bajo tráfico)
-   ┌────────────────────┐           ┌────────────────────┐
-   │  aislado en su      │           │  aislado en su      │
-   │  propio componente  │           │  propio componente  │
-   └─────────┬──────────┘           └─────────┬──────────┘
-             │ escala x10                      │ escala x1
-             ▼                                 ▼
-      [ muchos procesos ]                [ un proceso ]
+```mermaid
+flowchart TB
+    A["⚙️ Use case A (high traffic)<br/>isolated in its own component"] ==>|scales x10| AP["🖥️ Many processes"]
+    B["⚙️ Use case B (low traffic)<br/>isolated in its own component"] ==>|scales x1| BP["🖥️ One process"]
+
+    style A fill:#1565c0,stroke:#90caf9,color:#fff,stroke-width:2px
+    style B fill:#1565c0,stroke:#90caf9,color:#fff,stroke-width:2px
+    style AP fill:#37474f,stroke:#90a4ae,color:#fff,stroke-width:2px
+    style BP fill:#37474f,stroke:#90a4ae,color:#fff,stroke-width:2px
 ```
 
 ## Independencia de desarrollo y de despliegue
@@ -54,14 +60,21 @@ La independencia nace de separar el sistema en dos direcciones a la vez:
 ```mermaid
 flowchart LR
     subgraph Horizontal["Por capas (horizontal)"]
-        UI["UI"] --> BR["Reglas de negocio"] --> DB["Base de datos"]
+        UI["🖥️ UI"] ==> BR["🧠 Business rules"] ==> DB["🗄️ Database"]
     end
     subgraph Vertical["Por casos de uso (vertical)"]
-        A["Agregar al carrito"]
-        B["Procesar pago"]
-        C["Ver historial"]
+        A["⚙️ Add to cart"]
+        B["⚙️ Process payment"]
+        C["⚙️ View history"]
     end
-    Horizontal -.se cruza con.-> Vertical
+    Horizontal -.crosses with.-> Vertical
+
+    style UI fill:#1565c0,stroke:#90caf9,color:#fff,stroke-width:2px
+    style BR fill:#2e7d32,stroke:#a5d6a7,color:#fff,stroke-width:2px
+    style DB fill:#37474f,stroke:#90a4ae,color:#fff,stroke-width:2px
+    style A fill:#1565c0,stroke:#90caf9,color:#fff,stroke-width:2px
+    style B fill:#1565c0,stroke:#90caf9,color:#fff,stroke-width:2px
+    style C fill:#1565c0,stroke:#90caf9,color:#fff,stroke-width:2px
 ```
 
 - **Horizontal:** separar por capas técnicas (UI, reglas de negocio, persistencia).

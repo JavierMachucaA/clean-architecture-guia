@@ -37,40 +37,50 @@ El caso clásico es la GUI: la presentación en pantalla es difícil de testear,
 ```mermaid
 flowchart LR
     subgraph Testeable["Zona testeable"]
-        P["Presenter\n(toda la logica)"]
+        P["🧠 Presenter<br/>(toda la logica)"]
     end
     subgraph Humilde["Humble Object"]
-        V["View\n(solo pinta)"]
+        V["🖥️ View<br/>(solo pinta)"]
     end
-    P -->|View Model| V
-    T["Test"] -.verifica.-> P
+    P ==>|View Model| V
+    T["✅ Test"] -.verifica.-> P
     T -.NO verifica.-> V
+
+    class P testeable
+    class V view
+    class T iface
+    classDef testeable fill:#2e7d32,stroke:#a5d6a7,color:#fff,stroke-width:2px
+    classDef view fill:#37474f,stroke:#90a4ae,color:#fff,stroke-width:2px
+    classDef iface fill:#1565c0,stroke:#90caf9,color:#fff,stroke-width:2px
 ```
 
 El mismo principio aplica a bases de datos (gateways humildes), servicios externos y cualquier frontera con el mundo real. La lógica se aleja del límite y se concentra donde sí se puede probar.
 
 ## Vista de capas: dónde viven los tests
 
-```
-        +-----------------------------------------------+
-        |   TESTS (el circulo mas externo de todos)     |
-        |   +---------------------------------------+   |
-        |   |  Frameworks & Drivers (UI, BD, Web)   |   |
-        |   |  +---------------------------------+  |   |
-        |   |  |  Adaptadores de interfaz        |  |   |
-        |   |  |  +---------------------------+  |  |   |
-        |   |  |  |  Casos de uso             |  |  |   |
-        |   |  |  |  +---------------------+  |  |  |   |
-        |   |  |  |  |  Entidades          |  |  |  |   |
-        |   |  |  |  +---------------------+  |  |  |   |
-        |   |  |  +---------------------------+  |  |   |
-        |   |  +---------------------------------+  |   |
-        |   +---------------------------------------+   |
-        +-----------------------------------------------+
-             Las dependencias SIEMPRE apuntan hacia adentro
+```mermaid
+flowchart TB
+    T["✅ Tests<br/>(el circulo mas externo de todos)"]
+    FW["🌐 Frameworks & Drivers<br/>(UI, DB, Web)"]
+    IA["🔄 Interface Adapters"]
+    UC["⚙️ Use Cases"]
+    E["🟡 Entities"]
+
+    T ==> FW ==> IA ==> UC ==> E
+
+    class T iface
+    class FW ext
+    class IA adapter
+    class UC nucleo
+    class E entity
+    classDef iface fill:#1565c0,stroke:#90caf9,color:#fff,stroke-width:2px
+    classDef ext fill:#37474f,stroke:#90a4ae,color:#fff,stroke-width:2px
+    classDef adapter fill:#6a1b9a,stroke:#ce93d8,color:#fff,stroke-width:2px
+    classDef nucleo fill:#2e7d32,stroke:#a5d6a7,color:#fff,stroke-width:2px
+    classDef entity fill:#f9a825,stroke:#f57f17,color:#000,stroke-width:2px
 ```
 
-Los tests envuelven al sistema, pero jamás forman parte de él en tiempo de ejecución.
+Las dependencias SIEMPRE apuntan hacia adentro. Los tests envuelven al sistema, pero jamás forman parte de él en tiempo de ejecución.
 
 ## Punto clave para recordar
 

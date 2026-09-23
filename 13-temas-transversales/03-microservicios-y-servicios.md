@@ -17,18 +17,37 @@ Dos falacias frecuentes:
 
 Martin usa un sistema de taxis dividido en microservicios. Añadir una funcionalidad transversal —por ejemplo, ofrecer viajes gratis a cachorros de una universidad— obliga a tocar **casi todos** los servicios a la vez:
 
-```
-   Nueva funcionalidad transversal ("cross-cutting")
-             |
-    +--------+--------+--------+--------+
-    v        v        v        v        v
- [Movil]  [Cobros] [Conduct.][Ubicac.][Cocina]
-    |        |        |        |        |
-    +--------+--------+--------+--------+
-             |
-             v
-   Hay que modificar y redesplegar CASI TODOS
-   -> los servicios NO estaban desacoplados de verdad
+```mermaid
+flowchart TB
+    F["⚙️ Nueva funcionalidad transversal<br/>(cross-cutting)"]
+    S1["📦 Mobile"]
+    S2["📦 Billing"]
+    S3["📦 Drivers"]
+    S4["📦 Location"]
+    S5["📦 Kitchen"]
+    R["⛔ Hay que modificar y redesplegar CASI TODOS<br/>los servicios NO estaban desacoplados de verdad"]
+
+    F ==> S1
+    F ==> S2
+    F ==> S3
+    F ==> S4
+    F ==> S5
+    S1 ==> R
+    S2 ==> R
+    S3 ==> R
+    S4 ==> R
+    S5 ==> R
+
+    class F iface
+    class S1 dto
+    class S2 dto
+    class S3 dto
+    class S4 dto
+    class S5 dto
+    class R detalle
+    classDef iface fill:#1565c0,stroke:#90caf9,color:#fff,stroke-width:2px
+    classDef dto fill:#1565c0,stroke:#90caf9,color:#fff,stroke-width:2px
+    classDef detalle fill:#c62828,stroke:#ff8a80,color:#fff,stroke-width:2px
 ```
 
 La lección: dividir en servicios no evita el problema de los cambios que cruzan fronteras. Ese problema se resuelve con **buen diseño de componentes** (por ejemplo, el patrón que permite añadir la nueva feature sin tocar todo), y ese diseño es independiente de si el sistema es monolítico o de microservicios.
@@ -50,14 +69,21 @@ Un servicio, por dentro, debe tener sus propios boundaries: entidades, casos de 
 flowchart TB
     subgraph Servicio["Un microservicio (por dentro)"]
         direction TB
-        E["Entidades"]
-        U["Casos de uso"]
-        A["Adaptadores"]
-        A --> U --> E
+        A["🔄 Adapters"]
+        U["⚙️ Use Cases"]
+        E["🟡 Entities"]
+        A ==> U ==> E
     end
-    Nota["La arquitectura de verdad esta AQUI DENTRO,\nno en la linea que separa un servicio de otro"]:::n
+    Nota["🧠 La arquitectura de verdad esta AQUI DENTRO,<br/>no en la linea que separa un servicio de otro"]:::nota
     Servicio --- Nota
-    classDef n fill:#eef,stroke:#88a,color:#224;
+
+    class A adapter
+    class U nucleo
+    class E entity
+    classDef adapter fill:#6a1b9a,stroke:#ce93d8,color:#fff,stroke-width:2px
+    classDef nucleo fill:#2e7d32,stroke:#a5d6a7,color:#fff,stroke-width:2px
+    classDef entity fill:#f9a825,stroke:#f57f17,color:#000,stroke-width:2px
+    classDef nota fill:#2e7d32,stroke:#a5d6a7,color:#fff,stroke-width:2px
 ```
 
 Los servicios son útiles: escalan, aíslan fallos, permiten equipos independientes. Pero conviene tratarlos como lo que son —un detalle de despliegue— y no confundirlos con la arquitectura.

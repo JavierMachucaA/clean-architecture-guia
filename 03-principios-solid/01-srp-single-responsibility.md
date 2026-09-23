@@ -20,41 +20,53 @@ Imaginemos una clase `Employee` con tres métodos que sirven a **tres actores di
 
 ```mermaid
 flowchart TD
-    E["Clase Employee"]
-    E --> CP["calcularPago()"]
-    E --> RH["reportarHoras()"]
-    E --> GB["guardar()"]
+    E["🧠 Employee"]
+    E ==> CP["calculatePay()"]
+    E ==> RH["reportHours()"]
+    E ==> GB["save()"]
 
-    CP -.responde a.-> CFO["👔 CFO / Contabilidad"]
-    RH -.responde a.-> COO["📊 COO / Recursos Humanos"]
+    CP -.responde a.-> CFO["👔 CFO / Accounting"]
+    RH -.responde a.-> COO["📊 COO / Human Resources"]
     GB -.responde a.-> DBA["🗄️ CTO / DBA"]
+
+    style E fill:#c62828,stroke:#ff8a80,color:#fff,stroke-width:3px
+    style CP fill:#1565c0,stroke:#90caf9,color:#fff,stroke-width:2px
+    style RH fill:#1565c0,stroke:#90caf9,color:#fff,stroke-width:2px
+    style GB fill:#1565c0,stroke:#90caf9,color:#fff,stroke-width:2px
+    style CFO fill:#37474f,stroke:#90a4ae,color:#fff,stroke-width:2px
+    style COO fill:#37474f,stroke:#90a4ae,color:#fff,stroke-width:2px
+    style DBA fill:#37474f,stroke:#90a4ae,color:#fff,stroke-width:2px
 ```
 
 Esta clase viola SRP: **tres actores dependen del mismo módulo**. Un cambio pedido por uno puede romper el trabajo de otro.
 
+```mermaid
+flowchart LR
+    CFO["👔 CFO"] ==> E
+    COO["📊 COO"] ==> E
+    CTO["🗄️ CTO"] ==> E
+    E["⛔ Employee<br/>calculatePay()<br/>reportHours()<br/>save()"]
+
+    style CFO fill:#37474f,stroke:#90a4ae,color:#fff,stroke-width:2px
+    style COO fill:#37474f,stroke:#90a4ae,color:#fff,stroke-width:2px
+    style CTO fill:#37474f,stroke:#90a4ae,color:#fff,stroke-width:2px
+    style E fill:#c62828,stroke:#ff8a80,color:#fff,stroke-width:3px
 ```
-              ┌─────────────────────────────┐
-   CFO ──────►│                             │
-              │        Employee             │
-   COO ──────►│  calcularPago()             │
-              │  reportarHoras()            │
-   CTO ──────►│  guardar()                  │
-              └─────────────────────────────┘
-        Tres actores, UN solo módulo  ❌
-```
+
+Tres actores apuntan a **un solo módulo** `Employee`. Es justo lo que SRP prohíbe.
 
 ## Los síntomas de violar SRP
 
 ### Síntoma 1 — Colisiones accidentales
 
-Supón que `calcularPago()` (del CFO) y `reportarHoras()` (del COO) comparten un método privado `horasRegulares()`. Un día, Contabilidad pide cambiar cómo se calculan las horas regulares para el pago.
+Supón que `calculatePay()` (del CFO) y `reportHours()` (del COO) comparten un método privado `regularHours()`. Un día, Contabilidad pide cambiar cómo se calculan las horas regulares para el pago.
 
-El desarrollador modifica `horasRegulares()`… y sin saberlo **rompe el reporte del COO**, porque ambos compartían ese código.
+El desarrollador modifica `regularHours()`… y sin saberlo **rompe el reporte del COO**, porque ambos compartían ese código.
 
 | Actor | Método que usa | Cambio pedido | Efecto colateral |
 |-------|----------------|---------------|------------------|
-| CFO (Contabilidad) | `calcularPago()` | Ajustar horas regulares | ✅ Su cálculo cambia |
-| COO (RR. HH.) | `reportarHoras()` | *(no pidió nada)* | ❌ Su reporte queda mal |
+| CFO (Contabilidad) | `calculatePay()` | Ajustar horas regulares | ✅ Su cálculo cambia |
+| COO (RR. HH.) | `reportHours()` | *(no pidió nada)* | ❌ Su reporte queda mal |
 
 ### Síntoma 2 — Merges (fusiones) peligrosas
 
@@ -66,14 +78,19 @@ La forma más simple es **separar los datos de las funciones**. Los datos quedan
 
 ```mermaid
 flowchart TD
-    ED["EmployeeData<br/>(datos, sin métodos)"]
-    CP["CalculadorDePago<br/>→ CFO"]
-    RH["ReporteDeHoras<br/>→ COO"]
-    GB["RepositorioEmployee<br/>→ CTO"]
+    ED["📦 EmployeeData<br/>(data only, no methods)"]
+    CP["⚙️ PayCalculator<br/>→ CFO"]
+    RH["⚙️ HourReporter<br/>→ COO"]
+    GB["🗄️ EmployeeRepository<br/>→ CTO"]
 
-    CP --> ED
-    RH --> ED
-    GB --> ED
+    CP ==> ED
+    RH ==> ED
+    GB ==> ED
+
+    style ED fill:#1565c0,stroke:#90caf9,color:#fff,stroke-width:3px
+    style CP fill:#2e7d32,stroke:#a5d6a7,color:#fff,stroke-width:2px
+    style RH fill:#2e7d32,stroke:#a5d6a7,color:#fff,stroke-width:2px
+    style GB fill:#2e7d32,stroke:#a5d6a7,color:#fff,stroke-width:2px
 ```
 
 Ahora cada actor tiene su propia clase. Un cambio del CFO no puede romper el reporte del COO.
@@ -84,10 +101,10 @@ Ahora cada actor tiene su propia clase. Un cambio del CFO no puede romper el rep
 
 ```
 class Employee {
-    calcularPago()      // lo quiere el CFO
-    reportarHoras()     // lo quiere el COO
-    guardar()           // lo quiere el CTO
-    horasRegulares()    // compartido → fuente de accidentes
+    calculatePay()      // wanted by the CFO
+    reportHours()       // wanted by the COO
+    save()              // wanted by the CTO
+    regularHours()      // shared -> source of accidents
 }
 ```
 
@@ -96,11 +113,11 @@ Cambiar algo para un actor arriesga romper a los demás.
 ### ✅ Bien aplicado — un módulo por actor
 
 ```
-struct EmployeeData { ... }                 // solo datos
+struct EmployeeData { ... }                     // data only
 
-class CalculadorDePago  { calcularPago(EmployeeData) }    // CFO
-class ReporteDeHoras    { reportarHoras(EmployeeData) }   // COO
-class RepositorioEmployee { guardar(EmployeeData) }       // CTO
+class PayCalculator      { calculatePay(EmployeeData) }   // CFO
+class HourReporter       { reportHours(EmployeeData) }    // COO
+class EmployeeRepository { save(EmployeeData) }           // CTO
 ```
 
 Cada clase tiene **una sola razón para cambiar**. (Un patrón como *Facade* puede reunir las tres si se quiere una única puerta de entrada.)

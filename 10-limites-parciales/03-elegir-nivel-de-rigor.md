@@ -12,13 +12,21 @@ La decisión depende de cuánta certeza hay sobre el eje de cambio y de cuánto 
 
 ```mermaid
 flowchart TD
-    Start[¿Sospecho un eje de cambio aquí?]
-    Start -->|No, es estable| None[Sin límite]
-    Start -->|Quizás, incertidumbre| Partial[Límite parcial]
-    Start -->|Sí, casi seguro y caro de revertir| Full[Full boundary]
-    Partial --> Watch[Observar el sistema]
-    Watch -->|el eje se confirma| Promote[Promover a full boundary]
-    Watch -->|el eje desaparece| Relax[Relajar / eliminar el límite]
+    Start{"🧠 Do I suspect a<br/>change axis here?"}
+    Start ==>|No, it's stable| None[No boundary]
+    Start ==>|Maybe, uncertain| Partial[Partial boundary]
+    Start ==>|Yes, near-certain and costly to revert| Full[✅ Full boundary]
+    Partial ==> Watch[👁️ Watch the system]
+    Watch ==>|axis is confirmed| Promote[Promote to full boundary]
+    Watch ==>|axis disappears| Relax[Relax / remove the boundary]
+
+    style Start fill:#f9a825,stroke:#f57f17,color:#000,stroke-width:3px
+    style None fill:#37474f,stroke:#90a4ae,color:#fff,stroke-width:2px
+    style Partial fill:#1565c0,stroke:#90caf9,color:#fff,stroke-width:2px
+    style Full fill:#2e7d32,stroke:#a5d6a7,color:#fff,stroke-width:2px
+    style Watch fill:#6a1b9a,stroke:#ce93d8,color:#fff,stroke-width:2px
+    style Promote fill:#2e7d32,stroke:#a5d6a7,color:#fff,stroke-width:2px
+    style Relax fill:#c62828,stroke:#ff8a80,color:#fff,stroke-width:2px
 ```
 
 - Si la parte del sistema es estable y no se anticipa divergencia, no vale la pena ningún límite todavía.
@@ -27,15 +35,19 @@ flowchart TD
 
 ## Reforzar o relajar con el tiempo
 
-```
-LÍNEA DE TIEMPO DE UN LÍMITE
+```mermaid
+flowchart LR
+    N[No boundary] ==> Fa[Facade] ==> Od[One-dimensional] ==> Fu[✅ Full boundary]
+    N -. "🔄 reinforce as coupling pain grows ==>" .-> Fu
+    Fu -. "<== 🔄 relax when scaffolding adds no value" .-> N
 
-  Sin límite  --->  Facade  --->  One-dimensional  --->  Full boundary
-      |                |                 |                     |
-      |  (reforzar cuando el dolor de acoplamiento crece) --> |
-      |                                                        |
-      | <-- (relajar cuando el andamiaje no aporta valor)      |
+    style N fill:#37474f,stroke:#90a4ae,color:#fff,stroke-width:2px
+    style Fa fill:#6a1b9a,stroke:#ce93d8,color:#fff,stroke-width:2px
+    style Od fill:#1565c0,stroke:#90caf9,color:#fff,stroke-width:2px
+    style Fu fill:#2e7d32,stroke:#a5d6a7,color:#fff,stroke-width:2px
 ```
+
+La progresión de rigor va de izquierda a derecha (reforzar) y puede recorrerse en sentido inverso (relajar).
 
 El arquitecto vigila el costo de cada límite frente al beneficio que entrega. Cuando el acoplamiento empieza a doler —cambios que se propagan, despliegues acoplados, equipos que se pisan— refuerza el límite subiendo un escalón de rigor. Cuando descubre que un límite completo solo estorba y nadie aprovecha su aislamiento, lo relaja para reducir la carga de mantenimiento.
 

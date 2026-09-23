@@ -6,14 +6,22 @@ Todo sistema de software aporta a sus stakeholders **dos valores distintos**:
 
 ```mermaid
 flowchart LR
-    SW["Software"] --> C["Comportamiento<br/>(Behavior)"]
-    SW --> E["Estructura<br/>(Architecture)"]
+    SW["🖥️ Software"] ==> C["Behavior"]
+    SW ==> E["Architecture"]
 
-    C --> C1["Hacer que la máquina<br/>haga lo que el negocio pide"]
-    C --> C2["Corregir bugs<br/>de comportamiento"]
+    C ==> C1["Make the machine<br/>do what the business asks"]
+    C ==> C2["Fix behavior<br/>bugs"]
 
-    E --> E1["Que el software sea<br/>fácil de cambiar (soft)"]
-    E --> E2["Que nuevos requisitos<br/>se puedan implementar barato"]
+    E ==> E1["Keep the software<br/>easy to change (soft)"]
+    E ==> E2["Let new requirements<br/>be implemented cheaply"]
+
+    style SW fill:#1565c0,stroke:#90caf9,color:#fff,stroke-width:3px
+    style C fill:#c62828,stroke:#ff8a80,color:#fff,stroke-width:2px
+    style E fill:#2e7d32,stroke:#a5d6a7,color:#fff,stroke-width:2px
+    style C1 fill:#37474f,stroke:#90a4ae,color:#fff,stroke-width:2px
+    style C2 fill:#37474f,stroke:#90a4ae,color:#fff,stroke-width:2px
+    style E1 fill:#37474f,stroke:#90a4ae,color:#fff,stroke-width:2px
+    style E2 fill:#37474f,stroke:#90a4ae,color:#fff,stroke-width:2px
 ```
 
 1. **Comportamiento:** lo que el sistema hace. Es urgente, visible y lo que todos piden. "Que funcione".
@@ -29,20 +37,24 @@ Uncle Bob juega con la etimología: *soft-ware* significa "producto blando". La 
 
 Aquí aparece la trampa. El dilema se entiende con la matriz **urgente / importante**:
 
+```mermaid
+flowchart TB
+    subgraph Urgent["URGENTE"]
+        Q1["1 — Critical behavior<br/>(important, do it now)"]
+        Q3["3 — Urgent but trivial behavior<br/>(looks like priority #1)"]
+    end
+    subgraph NotUrgent["NO URGENTE"]
+        Q2["2 — Architecture<br/>(important, not urgent)"]
+        Q4["4 — Noise<br/>(not important, ignore)"]
+    end
+
+    style Q1 fill:#2e7d32,stroke:#a5d6a7,color:#fff,stroke-width:2px
+    style Q2 fill:#2e7d32,stroke:#a5d6a7,color:#fff,stroke-width:3px
+    style Q3 fill:#c62828,stroke:#ff8a80,color:#fff,stroke-width:2px
+    style Q4 fill:#37474f,stroke:#90a4ae,color:#fff,stroke-width:2px
 ```
-                 IMPORTANTE                 NO IMPORTANTE
-              ┌───────────────────────┬───────────────────────┐
-   URGENTE    │  1                    │  3                     │
-              │  Comportamiento       │  Comportamiento        │
-              │  crítico              │  urgente pero trivial  │
-              │  (hazlo ya)           │  (parece prioridad #1) │
-              ├───────────────────────┼───────────────────────┤
-   NO         │  2                    │  4                     │
-   URGENTE    │  ARQUITECTURA         │  Ruido                 │
-              │  (importante,         │  (ignorar)             │
-              │   no urgente)         │                        │
-              └───────────────────────┴───────────────────────┘
-```
+
+Columna izquierda (`Q1`, `Q2`) = **importante**; columna derecha (`Q3`, `Q4`) = **no importante**. El bloque `URGENTE` agrupa los cuadrantes 1 y 3; el bloque `NO URGENTE` agrupa los cuadrantes 2 y 4.
 
 - El **comportamiento** suele ser **urgente** pero no siempre importante.
 - La **arquitectura** es **importante** pero casi nunca urgente.
@@ -68,9 +80,14 @@ Los stakeholders no están capacitados para evaluar la arquitectura: solo ven el
 
 ```mermaid
 flowchart TD
-    S["Stakeholders<br/>piden comportamiento urgente"] --> D{"Equipo de<br/>desarrollo"}
-    D --> R["Responsable de PROTEGER<br/>la estructura del sistema"]
-    R --> A["Es una lucha, no un favor<br/>(ver siguiente documento)"]
+    S["Stakeholders<br/>ask for urgent behavior"] ==> D{"Development<br/>team"}
+    D ==> R["✅ Responsible for PROTECTING<br/>the system structure"]
+    R ==> A["It's a fight, not a favor<br/>(see next document)"]
+
+    style S fill:#c62828,stroke:#ff8a80,color:#fff,stroke-width:2px
+    style D fill:#1565c0,stroke:#90caf9,color:#fff,stroke-width:3px
+    style R fill:#2e7d32,stroke:#a5d6a7,color:#fff,stroke-width:2px
+    style A fill:#37474f,stroke:#90a4ae,color:#fff,stroke-width:2px
 ```
 
 Es **responsabilidad del equipo de desarrollo** defender la arquitectura, porque son los únicos que entienden su importancia. No es traición al negocio: es proteger el activo del negocio.

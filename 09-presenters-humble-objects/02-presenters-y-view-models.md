@@ -13,10 +13,16 @@ La interfaz de usuario es difícil de testear: hay que arrancar la pantalla, mov
 
 El **View Model** es una estructura de datos plana con **todo ya resuelto**: textos formateados, banderas de estado, colores como strings, listas listas para pintar. No tiene lógica.
 
-```
-   Caso de uso  ──►  Presenter  ──►  View Model  ──►  View
-   (resultado)       (decide y        (datos ya      (solo
-                      formatea)        cocinados)      pinta)
+```mermaid
+flowchart LR
+    UC["⚙️ Use case<br/>(resultado)"] ==> P["🧠 Presenter<br/>(decide y formatea)"]
+    P ==> VM["📦 View Model<br/>(datos ya cocinados)"]
+    VM ==> V["🖥️ View<br/>(solo pinta)"]
+
+    style UC fill:#2e7d32,stroke:#a5d6a7,color:#fff,stroke-width:2px
+    style P fill:#6a1b9a,stroke:#ce93d8,color:#fff,stroke-width:2px
+    style VM fill:#1565c0,stroke:#90caf9,color:#fff,stroke-width:2px
+    style V fill:#37474f,stroke:#90a4ae,color:#fff,stroke-width:2px
 ```
 
 Todo lo que requiere una **decisión** ocurre en el Presenter, que sí se puede probar. La View recibe el plato terminado.
@@ -25,10 +31,16 @@ Todo lo que requiere una **decisión** ocurre en el Presenter, que sí se puede 
 
 ```mermaid
 flowchart LR
-    UC["Caso de uso"] -->|Output Data| P["Presenter<br/>(testeable)"]
-    P -->|llena| VM["View Model<br/>(datos planos)"]
-    VM -->|lee| V["View<br/>(humilde)"]
-    V --> S["Pantalla"]
+    UC["⚙️ Use case"] ==>|Output Data| P["🧠 Presenter<br/>(testeable)"]
+    P ==>|llena| VM["📦 View Model<br/>(datos planos)"]
+    VM ==>|lee| V["🖥️ View<br/>(humilde)"]
+    V ==> S["Screen"]
+
+    style UC fill:#2e7d32,stroke:#a5d6a7,color:#fff,stroke-width:2px
+    style P fill:#6a1b9a,stroke:#ce93d8,color:#fff,stroke-width:2px
+    style VM fill:#1565c0,stroke:#90caf9,color:#fff,stroke-width:2px
+    style V fill:#37474f,stroke:#90a4ae,color:#fff,stroke-width:2px
+    style S fill:#37474f,stroke:#90a4ae,color:#fff,stroke-width:2px
 ```
 
 El Presenter transforma un objeto de salida (Output Data) en un View Model; la View simplemente lo muestra.
@@ -51,11 +63,11 @@ Nada en la columna "Presenter" toca la pantalla; nada en la columna "View" toma 
 ❌ La View calcula y formatea (no testeable sin GUI):
 
 ```java
-class PedidoView {
-    void render(Pedido pedido) {
-        fecha.setText(new SimpleDateFormat("dd/MM/yyyy").format(pedido.getFecha()));
-        total.setText("$" + String.format("%.2f", pedido.getTotal()));
-        boton.setEnabled(pedido.getEstado() == PAGADO); // decisión en la vista
+class OrderView {
+    void render(Order order) {
+        date.setText(new SimpleDateFormat("dd/MM/yyyy").format(order.getDate()));
+        total.setText("$" + String.format("%.2f", order.getTotal()));
+        button.setEnabled(order.getStatus() == PAID); // decision in the view
     }
 }
 ```
@@ -63,43 +75,48 @@ class PedidoView {
 ✅ El Presenter prepara un View Model; la View solo lo copia:
 
 ```java
-// Testeable
-class PedidoPresenter {
-    PedidoViewModel presentar(PedidoOutput out) {
-        PedidoViewModel vm = new PedidoViewModel();
-        vm.fecha = new SimpleDateFormat("dd/MM/yyyy").format(out.fecha);
+// Testable
+class OrderPresenter {
+    OrderViewModel present(OrderOutput out) {
+        OrderViewModel vm = new OrderViewModel();
+        vm.date = new SimpleDateFormat("dd/MM/yyyy").format(out.date);
         vm.total = "$" + String.format("%.2f", out.total);
-        vm.botonHabilitado = out.estado == PAGADO;
+        vm.buttonEnabled = out.status == PAID;
         return vm;
     }
 }
 
-// Humilde
-class PedidoView {
-    void render(PedidoViewModel vm) {
-        fecha.setText(vm.fecha);
+// Humble
+class OrderView {
+    void render(OrderViewModel vm) {
+        date.setText(vm.date);
         total.setText(vm.total);
-        boton.setEnabled(vm.botonHabilitado);
+        button.setEnabled(vm.buttonEnabled);
     }
 }
 ```
 
-Con esto, `PedidoPresenter` se prueba con asserts sobre el View Model, sin abrir una sola ventana.
+Con esto, `OrderPresenter` se prueba con asserts sobre el View Model, sin abrir una sola ventana.
 
 ## En qué capa vive cada pieza
 
 ```mermaid
 flowchart TD
     subgraph Interna["Interface Adapters"]
-        P["Presenter"]
-        VM["View Model"]
+        P["🧠 Presenter"]
+        VM["📦 View Model"]
     end
     subgraph Externa["Frameworks & Drivers"]
-        V["View (framework GUI)"]
+        V["🖥️ View (GUI framework)"]
     end
-    UC["Casos de uso"] --> P
-    P --> VM
-    V -->|depende de| VM
+    UC["⚙️ Use cases"] ==> P
+    P ==> VM
+    V ==>|depende de| VM
+
+    style P fill:#6a1b9a,stroke:#ce93d8,color:#fff,stroke-width:2px
+    style VM fill:#1565c0,stroke:#90caf9,color:#fff,stroke-width:2px
+    style V fill:#37474f,stroke:#90a4ae,color:#fff,stroke-width:2px
+    style UC fill:#2e7d32,stroke:#a5d6a7,color:#fff,stroke-width:2px
 ```
 
 El Presenter y el View Model quedan del lado interno (adaptadores de interfaz); la View, atada al framework gráfico, queda en el borde y depende hacia adentro.

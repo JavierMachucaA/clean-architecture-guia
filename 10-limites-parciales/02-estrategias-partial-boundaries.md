@@ -16,13 +16,17 @@ El full boundary usa interfaces recíprocas (doble dirección) para aislar compl
 
 ```mermaid
 classDiagram
-    class Cliente
+    class Client
     class ServiceBoundary {
         <<interface>>
     }
     class ServiceImpl
-    Cliente --> ServiceBoundary : depende de
-    ServiceImpl ..|> ServiceBoundary : implementa
+    Client --> ServiceBoundary : depends on
+    ServiceImpl ..|> ServiceBoundary : implements
+
+    style Client fill:#2e7d32,stroke:#a5d6a7,color:#fff,stroke-width:2px
+    style ServiceBoundary fill:#1565c0,stroke:#90caf9,color:#fff,stroke-width:2px
+    style ServiceImpl fill:#37474f,stroke:#90a4ae,color:#fff,stroke-width:2px
 ```
 
 Aquí queda plantada la interfaz que separa al cliente de la implementación, dejando lista la costura para un futuro límite completo. Pero falta la dirección de retorno: no hay puerto de salida que proteja al servicio del cliente. El riesgo es que, sin la disciplina de la doble dirección, alguien deje pasar dependencias por atrás y erosione la separación con el tiempo.
@@ -31,20 +35,18 @@ Aquí queda plantada la interfaz que separa al cliente de la implementación, de
 
 La opción más simple de todas es la **facade**. No hay ni siquiera una interfaz de límite: solo una clase fachada que expone métodos como servicios y delega cada llamada a las clases de servicio que el cliente no debería tocar directamente.
 
-```
-        +------------------+
-        |     Cliente      |
-        +------------------+
-                 |
-                 v
-        +------------------+
-        |     Facade       |   (una sola clase, sin interfaz)
-        +------------------+
-          |      |       |
-          v      v       v
-      +------++------++------+
-      |Serv A||Serv B||Serv C|
-      +------++------++------+
+```mermaid
+flowchart TD
+    Client[🖥️ Client] ==> Facade["⚙️ Facade<br/>(single class, no interface)"]
+    Facade ==> SA[Service A]
+    Facade ==> SB[Service B]
+    Facade ==> SC[Service C]
+
+    style Client fill:#2e7d32,stroke:#a5d6a7,color:#fff,stroke-width:2px
+    style Facade fill:#6a1b9a,stroke:#ce93d8,color:#fff,stroke-width:3px
+    style SA fill:#37474f,stroke:#90a4ae,color:#fff,stroke-width:2px
+    style SB fill:#37474f,stroke:#90a4ae,color:#fff,stroke-width:2px
+    style SC fill:#37474f,stroke:#90a4ae,color:#fff,stroke-width:2px
 ```
 
 El cliente depende directamente de la fachada, y la fachada depende de todos los servicios. Se oculta la existencia de los subcomponentes, pero el aislamiento es el menor de las tres estrategias: no hay inversión de dependencias, el cliente sigue dependiendo transitivamente de cada clase de servicio (por ejemplo, al compilar), y cualquier cambio en un servicio puede forzar recompilar al cliente.
@@ -59,13 +61,19 @@ El cliente depende directamente de la fachada, y la fachada depende de todos los
 
 ```mermaid
 flowchart TD
-    Q{¿Cuánto aislamiento\nnecesito hoy?} 
-    Q -->|Casi el de un full boundary| S[Skip the last step]
-    Q -->|Separación en una dirección| O[One-dimensional / Strategy]
-    Q -->|Solo ocultar subcomponentes| F[Facade]
-    S -->|más costo| Cost[Costo]
-    O --> Cost
-    F -->|menos costo| Cost
+    Q{"⚙️ How much isolation<br/>do I need today?"}
+    Q ==>|Almost a full boundary| S[✅ Skip the last step]
+    Q ==>|One-direction separation| O[One-dimensional / Strategy]
+    Q ==>|Only hide subcomponents| F[Facade]
+    S ==>|more cost| Cost[💲 Cost]
+    O ==> Cost
+    F ==>|less cost| Cost
+
+    style Q fill:#1565c0,stroke:#90caf9,color:#fff,stroke-width:3px
+    style S fill:#2e7d32,stroke:#a5d6a7,color:#fff,stroke-width:2px
+    style O fill:#1565c0,stroke:#90caf9,color:#fff,stroke-width:2px
+    style F fill:#6a1b9a,stroke:#ce93d8,color:#fff,stroke-width:2px
+    style Cost fill:#37474f,stroke:#90a4ae,color:#fff,stroke-width:2px
 ```
 
 ## Punto clave para recordar

@@ -12,21 +12,23 @@ Si la cohesión decide *qué clases van juntas*, el acoplamiento decide *cómo s
 
 El grafo de dependencias entre componentes debe ser un **DAG** (grafo dirigido acíclico). Un ciclo hace que dos o más componentes queden atados: no puedes compilar, probar ni liberar uno sin arrastrar a los demás. El clásico "síndrome de la mañana siguiente": alguien tocó un componente del ciclo y ahora nada compila.
 
-Considera este grafo con un ciclo entre `Entidades`, `Autorizacion` e `Interactores`:
+Considera este grafo con un ciclo entre `Entities`, `Authorization` e `Interactors`:
 
 ```mermaid
 flowchart TD
-    Main --> Interactores
-    Interactores --> Entidades
-    Entidades --> Autorizacion
-    Autorizacion --> Interactores
-    Interactores -.->|"CICLO"| Entidades
-    style Autorizacion fill:#f88
-    style Interactores fill:#f88
-    style Entidades fill:#f88
+    Main["Main"] ==> Interactors["Interactors"]
+    Interactors ==> Entities["Entities"]
+    Entities ==> Authorization["Authorization"]
+    Authorization ==> Interactors
+    Interactors -.->|"⛔ CICLO"| Entities
+
+    style Main fill:#37474f,stroke:#90a4ae,color:#fff,stroke-width:2px
+    style Interactors fill:#c62828,stroke:#ff8a80,color:#fff,stroke-width:2px
+    style Entities fill:#c62828,stroke:#ff8a80,color:#fff,stroke-width:2px
+    style Authorization fill:#c62828,stroke:#ff8a80,color:#fff,stroke-width:2px
 ```
 
-`Autorizacion → Interactores → Entidades → Autorizacion` forma un ciclo. Ninguno de esos tres se puede liberar de forma independiente.
+`Authorization → Interactors → Entities → Authorization` forma un ciclo. Ninguno de esos tres se puede liberar de forma independiente.
 
 ### Cómo romper un ciclo
 
@@ -38,24 +40,50 @@ Hay **dos técnicas** para eliminar un ciclo:
 
 ```mermaid
 flowchart TD
-    subgraph "Solución con DIP"
-        A1[Autorizacion] --> I1[Interfaz en Autorizacion]
-        E1[Entidades] -.->|implementa| I1
-        In1[Interactores] --> E1
-        In1 --> A1
+    subgraph SolucionDIP["🔄 Solución con DIP"]
+        A1["Authorization"] ==> I1["Interface in Authorization"]
+        E1["Entities"] -.->|implementa| I1
+        In1["Interactors"] ==> E1
+        In1 ==> A1
     end
+
+    style A1 fill:#2e7d32,stroke:#a5d6a7,color:#fff,stroke-width:2px
+    style I1 fill:#1565c0,stroke:#90caf9,color:#fff,stroke-width:3px
+    style E1 fill:#2e7d32,stroke:#a5d6a7,color:#fff,stroke-width:2px
+    style In1 fill:#2e7d32,stroke:#a5d6a7,color:#fff,stroke-width:2px
 ```
 
-Comparación en ASCII de las dos técnicas:
+Comparación de las dos técnicas. En **DIP** se introduce la interfaz `IB` y la flecha `B → IB` queda invertida respecto al ciclo original; en **Componente nuevo** todos apuntan hacia `C`, de modo que el ciclo desaparece:
 
-```
-  ANTES (ciclo)                DIP                      COMPONENTE NUEVO
-  ------------                 ---                      ----------------
-   A --> B                      A --> IB                 A --> C
-   ^     |                      ^     :implementa        ^     ^
-   |     v                      |     v                  |     |
-   +---- C                      +---- B                  B ----+
-   (A->B->C->A)                 (flecha invertida)       (todos -> C, sin ciclo)
+```mermaid
+flowchart LR
+    subgraph Antes["⛔ ANTES (ciclo)"]
+        direction TB
+        A0["A"] ==> B0["B"]
+        B0 ==> C0["C"]
+        C0 ==> A0
+    end
+    subgraph DIP["✅ DIP"]
+        direction TB
+        A1["A"] ==> IB1["IB"]
+        B1["B"] -.->|implementa| IB1
+        A1 ==> B1
+    end
+    subgraph Nuevo["✅ COMPONENTE NUEVO"]
+        direction TB
+        A2["A"] ==> C2["C"]
+        B2["B"] ==> C2
+    end
+
+    style A0 fill:#c62828,stroke:#ff8a80,color:#fff,stroke-width:2px
+    style B0 fill:#c62828,stroke:#ff8a80,color:#fff,stroke-width:2px
+    style C0 fill:#c62828,stroke:#ff8a80,color:#fff,stroke-width:2px
+    style A1 fill:#2e7d32,stroke:#a5d6a7,color:#fff,stroke-width:2px
+    style B1 fill:#2e7d32,stroke:#a5d6a7,color:#fff,stroke-width:2px
+    style IB1 fill:#1565c0,stroke:#90caf9,color:#fff,stroke-width:3px
+    style A2 fill:#2e7d32,stroke:#a5d6a7,color:#fff,stroke-width:2px
+    style B2 fill:#2e7d32,stroke:#a5d6a7,color:#fff,stroke-width:2px
+    style C2 fill:#1565c0,stroke:#90caf9,color:#fff,stroke-width:3px
 ```
 
 ## SDP — Dependencias estables
@@ -79,14 +107,23 @@ I = -----------------
 
 El SDP exige que **la I disminuya en la dirección de las flechas**: cada dependencia debe apuntar hacia un componente con I menor o igual.
 
-```
-   Cx (I=1.0)  --->  Cy (I=0.5)  --->  Cz (I=0.0)
-   inestable         intermedio        estable
-   [ correcto: I decrece siguiendo las flechas ]
+```mermaid
+flowchart LR
+    subgraph Correcto["✅ Correcto: I decrece siguiendo las flechas"]
+        direction LR
+        Cx["Cx<br/>I=1.0 · inestable"] ==> Cy["Cy<br/>I=0.5 · intermedio"]
+        Cy ==> Cz["Cz<br/>I=0.0 · estable"]
+    end
+    subgraph Violacion["⛔ Violación: un componente estable depende de uno inestable"]
+        direction LR
+        Ca["Ca<br/>I=0.0 · estable"] ==> Cb["Cb<br/>I=1.0 · inestable"]
+    end
 
-   Ca (I=0.0)  --->  Cb (I=1.0)
-   estable           inestable
-   [ VIOLACIÓN: un componente estable depende de uno inestable ]
+    style Cx fill:#c62828,stroke:#ff8a80,color:#fff,stroke-width:2px
+    style Cy fill:#1565c0,stroke:#90caf9,color:#fff,stroke-width:2px
+    style Cz fill:#2e7d32,stroke:#a5d6a7,color:#fff,stroke-width:2px
+    style Ca fill:#2e7d32,stroke:#a5d6a7,color:#fff,stroke-width:2px
+    style Cb fill:#c62828,stroke:#ff8a80,color:#fff,stroke-width:2px
 ```
 
 ## SAP — Abstracciones estables

@@ -34,39 +34,41 @@ CRP es la versión a nivel de componente del **Principio de Segregación de Inte
 
 ```mermaid
 flowchart TD
-    subgraph Fuerzas
+    subgraph Fuerzas["🧠 Fuerzas de cohesión"]
         REP["REP<br/>agrupa lo reutilizable"]
         CCP["CCP<br/>agrupa lo que cambia junto"]
         CRP["CRP<br/>separa lo no usado"]
     end
-    REP -->|inclusiva| G[Componentes más grandes]
-    CCP -->|inclusiva| G
-    CRP -->|exclusiva| P[Componentes más pequeños]
-    G <-->|tensión| P
+    REP ==>|inclusiva| G["📦 Componentes más grandes"]
+    CCP ==>|inclusiva| G
+    CRP ==>|exclusiva| P["📦 Componentes más pequeños"]
+    G <==>|tensión| P
+
+    style REP fill:#2e7d32,stroke:#a5d6a7,color:#fff,stroke-width:2px
+    style CCP fill:#2e7d32,stroke:#a5d6a7,color:#fff,stroke-width:2px
+    style CRP fill:#c62828,stroke:#ff8a80,color:#fff,stroke-width:2px
+    style G fill:#1565c0,stroke:#90caf9,color:#fff,stroke-width:2px
+    style P fill:#1565c0,stroke:#90caf9,color:#fff,stroke-width:2px
 ```
 
 ## La tensión entre REP, CCP y CRP
 
 REP y CCP son **inclusivos**: empujan hacia componentes más grandes (agrupa lo reutilizable, agrupa lo que cambia junto). CRP es **exclusivo**: empuja hacia componentes más pequeños (no cargues con lo que no usas). Un arquitecto que solo atiende a REP y CCP crea componentes enormes con demasiadas razones de cambio; uno que solo atiende a CRP crea tantos componentes minúsculos que cada cambio dispara reliberaciones en cadena.
 
-El **diagrama de tensión de cohesión** de Martin coloca los tres principios en los vértices de un triángulo. Cada arista representa el coste de ignorar el principio del vértice opuesto:
+El **diagrama de tensión de cohesión** de Martin coloca los tres principios en los vértices de un triángulo. Cada arista representa el coste de ignorar el principio del vértice opuesto: la arista REP–CCP surge al abandonar CRP (releases innecesarias), la arista REP–CRP al abandonar CCP (dependencias no usadas), y la arista CCP–CRP al abandonar REP (demasiados componentes cambian por un cambio).
 
-```
-                        REP
-             (demasiados componentes            
-              cambian por un cambio)            
-                        /\
-                       /  \
-                      /    \
-   Arista: se abandona/      \Arista: se abandona
-   CRP                /        \  CCP
-   (releases        /          \ (dependencias
-    innecesarias)  /            \  no usadas)
-                  /______________\
-               CCP                CRP
-        (demasiados          (demasiados
-         componentes          componentes
-         cambian)             se reliberan)
+```mermaid
+flowchart TD
+    REP["REP"]
+    CCP["CCP"]
+    CRP["CRP"]
+    REP <==>|"abandona CRP:<br/>releases innecesarias"| CCP
+    REP <==>|"abandona CCP:<br/>dependencias no usadas"| CRP
+    CCP <==>|"abandona REP:<br/>demasiados componentes cambian"| CRP
+
+    style REP fill:#2e7d32,stroke:#a5d6a7,color:#fff,stroke-width:3px
+    style CCP fill:#2e7d32,stroke:#a5d6a7,color:#fff,stroke-width:2px
+    style CRP fill:#c62828,stroke:#ff8a80,color:#fff,stroke-width:2px
 ```
 
 La posición dentro del triángulo se mueve con el tiempo. Un proyecto **joven** vive cerca del vértice CCP (prioriza el mantenimiento). Un proyecto **maduro** se desplaza hacia REP/CRP (prioriza la reutilización estable para consumidores externos).

@@ -14,22 +14,22 @@ El escenario típico: los tests atacan directamente la GUI, la estructura de la 
 
 Cuando la estructura cambia —y siempre cambia— el efecto es demoledor:
 
-```
-   Se mueve un boton de la GUI
-            |
-            v
-   +------------------------+
-   |  1 cambio estructural  |
-   +------------------------+
-            |
-            v
-   +--------------------------------------+
-   |  ~1000 tests rotos que no probaban   |
-   |  ese boton, solo pasaban por ahi     |
-   +--------------------------------------+
-            |
-            v
-   El equipo deja de escribir tests
+```mermaid
+flowchart TB
+    M["🖥️ Se mueve un boton de la GUI"]
+    C["⚙️ 1 cambio estructural"]
+    B["⛔ ~1000 tests rotos que no probaban<br/>ese boton, solo pasaban por ahi"]
+    Q["🚫 El equipo deja de escribir tests"]
+
+    M ==> C ==> B ==> Q
+
+    class M view
+    class C iface
+    class B detalle
+    class Q detalle
+    classDef view fill:#37474f,stroke:#90a4ae,color:#fff,stroke-width:2px
+    classDef iface fill:#1565c0,stroke:#90caf9,color:#fff,stroke-width:2px
+    classDef detalle fill:#c62828,stroke:#ff8a80,color:#fff,stroke-width:2px
 ```
 
 Un solo cambio provoca un daño desproporcionado. Esto viola una regla básica del diseño: cambios en el comportamiento deberían romper solo los tests de ese comportamiento.
@@ -44,19 +44,29 @@ La respuesta de Uncle Bob es tratar el acoplamiento de los tests como cualquier 
 
 ```mermaid
 flowchart TD
-    T["Suite de tests\n(miles de tests)"]
-    API["Testing API\n(frontera de desacoplamiento)"]
+    T["✅ Suite de tests<br/>(miles de tests)"]
+    API["🔌 Testing API<br/>(frontera de desacoplamiento)"]
     subgraph Sistema["Estructura interna (volatil)"]
-        GUI["GUI"]
-        UC["Casos de uso"]
-        DB["Base de datos"]
+        GUI["🖥️ GUI"]
+        UC["⚙️ Use Cases"]
+        DB["🗄️ Database"]
     end
-    T --> API
-    API --> GUI
-    API --> UC
-    API --> DB
-    Nota["Un cambio de estructura solo toca la API,\nno los miles de tests"]:::n
-    classDef n fill:#eee,stroke:#999,color:#333;
+    T ==> API
+    API ==> GUI
+    API ==> UC
+    API ==> DB
+    Nota["🔄 Un cambio de estructura solo toca la API,<br/>no los miles de tests"]:::nota
+
+    class T nucleo
+    class API iface
+    class GUI view
+    class UC detalle
+    class DB detalle
+    classDef nucleo fill:#2e7d32,stroke:#a5d6a7,color:#fff,stroke-width:2px
+    classDef iface fill:#1565c0,stroke:#90caf9,color:#fff,stroke-width:2px
+    classDef view fill:#37474f,stroke:#90a4ae,color:#fff,stroke-width:2px
+    classDef detalle fill:#c62828,stroke:#ff8a80,color:#fff,stroke-width:2px
+    classDef nota fill:#6a1b9a,stroke:#ce93d8,color:#fff,stroke-width:2px
 ```
 
 ## Separar la estructura de la verificación

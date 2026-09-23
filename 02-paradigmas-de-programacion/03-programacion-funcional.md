@@ -18,11 +18,18 @@ Todos los problemas de concurrencia nacen del **estado mutable compartido**:
 
 ```mermaid
 flowchart TD
-    M["Estado mutable compartido"] --> R["Condiciones de carrera (race conditions)"]
-    M --> D["Deadlocks"]
-    M --> U["Actualizaciones concurrentes corruptas"]
+    M["🚫 Shared Mutable State"] ==> R["⛔ Race Conditions"]
+    M ==> D["⛔ Deadlocks"]
+    M ==> U["⛔ Corrupted Concurrent Updates"]
 
-    I["Inmutabilidad"] --> S["Sin datos que mutar = sin carreras"]
+    I["✅ Immutability"] ==> S["🧠 Sin datos que mutar = sin carreras"]
+
+    style M fill:#c62828,stroke:#ff8a80,color:#fff,stroke-width:3px
+    style R fill:#c62828,stroke:#ff8a80,color:#fff,stroke-width:2px
+    style D fill:#c62828,stroke:#ff8a80,color:#fff,stroke-width:2px
+    style U fill:#c62828,stroke:#ff8a80,color:#fff,stroke-width:2px
+    style I fill:#2e7d32,stroke:#a5d6a7,color:#fff,stroke-width:3px
+    style S fill:#2e7d32,stroke:#a5d6a7,color:#fff,stroke-width:2px
 ```
 
 > Si nada muta, no hay condiciones de carrera, ni problemas de actualización concurrente, ni deadlocks. La inmutabilidad **elimina la causa raíz** de los bugs de concurrencia.
@@ -33,14 +40,18 @@ Un sistema real necesita cambiar de estado en algún punto (guardar datos, respo
 
 ```mermaid
 flowchart LR
-    subgraph Inmutable["Componentes INMUTABLES (la mayoría)"]
-        C1["Lógica pura"]
-        C2["Cálculos"]
+    subgraph Inmutable["✅ Componentes INMUTABLES (la mayoría)"]
+        C1["🧠 Pure Logic"]
+        C2["⚙️ Calculations"]
     end
-    subgraph Mutable["Componentes MUTABLES (aislados)"]
-        T["Transaction memory /<br/>estado, persistencia"]
+    subgraph Mutable["🚫 Componentes MUTABLES (aislados)"]
+        T["🗄️ Transaction Memory /<br/>State, Persistence"]
     end
-    Inmutable --> Mutable
+    C2 ==> T
+
+    style C1 fill:#2e7d32,stroke:#a5d6a7,color:#fff,stroke-width:2px
+    style C2 fill:#2e7d32,stroke:#a5d6a7,color:#fff,stroke-width:2px
+    style T fill:#c62828,stroke:#ff8a80,color:#fff,stroke-width:2px
 ```
 
 Se empuja la mutación hacia **componentes pequeños y bien delimitados**, protegidos (por ejemplo, con memoria transaccional), mientras el grueso del sistema permanece inmutable.
@@ -49,13 +60,20 @@ Se empuja la mutación hacia **componentes pequeños y bien delimitados**, prote
 
 Una estrategia asociada es **no almacenar el estado, sino los eventos** que lo producen:
 
-```
-   Enfoque tradicional              Event Sourcing
-   ┌──────────────┐                 ┌──────────────────────────┐
-   │ saldo = 100  │  ← se sobre-    │ +100, -30, +50, ...       │
-   │ (se muta)    │    escribe      │ (solo se agregan eventos) │
-   └──────────────┘                 └──────────────────────────┘
-                                     saldo = suma de eventos
+```mermaid
+flowchart LR
+    subgraph Traditional["🚫 Enfoque tradicional"]
+        TR["🗄️ balance = 100<br/>(se sobreescribe / muta)"]
+    end
+    subgraph EventSourcing["✅ Event Sourcing"]
+        ES["📦 +100, -30, +50, ...<br/>(solo se agregan eventos)"]
+        SUM["🧠 balance = suma de eventos"]
+        ES ==> SUM
+    end
+
+    style TR fill:#c62828,stroke:#ff8a80,color:#fff,stroke-width:2px
+    style ES fill:#1565c0,stroke:#90caf9,color:#fff,stroke-width:2px
+    style SUM fill:#2e7d32,stroke:#a5d6a7,color:#fff,stroke-width:2px
 ```
 
 Si solo **agregas** eventos y nunca borras ni actualizas, no hay mutación. El estado actual se **calcula** reproduciendo los eventos. Con suficiente almacenamiento y potencia, aplicaciones enteras pueden ser funcionales.

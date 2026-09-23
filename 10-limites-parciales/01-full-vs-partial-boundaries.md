@@ -15,33 +15,43 @@ Un límite parcial hace *parte* del trabajo de un límite completo. Reduce el co
 ```mermaid
 flowchart LR
     subgraph Full["Full boundary (caro)"]
-        A1[Componente A] -->|puerto entrada| B1[Componente B]
-        B1 -->|puerto salida| A1
+        A1[📦 Component A] ==>|input port| B1[📦 Component B]
+        B1 ==>|output port| A1
     end
     subgraph Partial["Partial boundary (más barato)"]
-        A2[Componente A] --> B2[Componente B]
+        A2[📦 Component A] ==> B2[📦 Component B]
     end
-    Full -. "más aislamiento\nmás costo" .-> Partial
+    Full -. "more isolation<br/>more cost" .-> Partial
+
+    style A1 fill:#37474f,stroke:#90a4ae,color:#fff,stroke-width:2px
+    style B1 fill:#37474f,stroke:#90a4ae,color:#fff,stroke-width:2px
+    style A2 fill:#1565c0,stroke:#90caf9,color:#fff,stroke-width:2px
+    style B2 fill:#1565c0,stroke:#90caf9,color:#fff,stroke-width:2px
 ```
 
 ## Comparación visual del andamiaje
 
-```
-FULL BOUNDARY
-+----------------------+                 +----------------------+
-|     Componente A     |                 |     Componente B     |
-|                      | == Input Port ==>|                     |
-|                      |<== Output Port ==|                     |
-+----------------------+                 +----------------------+
-   (desplegable propio)                     (desplegable propio)
-   doble dirección + separación total = ALTO COSTO
+```mermaid
+flowchart TB
+    subgraph FullB["FULL BOUNDARY — high cost"]
+        FA["📦 Component A<br/>(own deployable)"]
+        FB["📦 Component B<br/>(own deployable)"]
+        FA ==>|input port| FB
+        FB ==>|output port| FA
+    end
+    subgraph PartialB["PARTIAL BOUNDARY — lower cost"]
+        PA["📦 Component A"]
+        PB["📦 Component B"]
+        PA ==> PB
+    end
 
-PARTIAL BOUNDARY
-+----------------------+   +----------------------+
-|     Componente A     |-->|     Componente B     |
-+----------------------+   +----------------------+
-   (mismo despliegue / una sola dirección) = MENOR COSTO
+    style FA fill:#37474f,stroke:#90a4ae,color:#fff,stroke-width:2px
+    style FB fill:#37474f,stroke:#90a4ae,color:#fff,stroke-width:2px
+    style PA fill:#1565c0,stroke:#90caf9,color:#fff,stroke-width:2px
+    style PB fill:#1565c0,stroke:#90caf9,color:#fff,stroke-width:2px
 ```
+
+En el full boundary hay doble dirección (puerto de entrada y de salida) con despliegue separado; en el partial boundary la relación es de una sola dirección y con despliegue compartido.
 
 ## Costo/beneficio de cada opción
 

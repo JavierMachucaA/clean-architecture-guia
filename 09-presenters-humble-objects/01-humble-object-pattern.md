@@ -18,29 +18,31 @@ La idea es dividir la frontera en dos piezas:
 ```mermaid
 flowchart LR
     subgraph Frontera["Frontera del sistema"]
-        T["Objeto testeable<br/>(toda la logica)"]
-        H["Objeto humilde<br/>(sin logica,<br/>solo el detalle)"]
+        T["🧠 Testable object<br/>(all the logic)"]
+        H["🖥️ Humble object<br/>(no logic,<br/>only the detail)"]
     end
-    T -->|le entrega datos listos| H
-    H -->|toca| DET["GUI / hardware / BD / red"]
+    T ==>|le entrega datos listos| H
+    H ==>|toca| DET["GUI / hardware / DB / network"]
+
+    style T fill:#2e7d32,stroke:#a5d6a7,color:#fff,stroke-width:2px
+    style H fill:#37474f,stroke:#90a4ae,color:#fff,stroke-width:2px
+    style DET fill:#37474f,stroke:#90a4ae,color:#fff,stroke-width:2px
 ```
 
 El objeto testeable prepara el trabajo; el objeto humilde solo lo ejecuta contra el mundo real.
 
 ## Cómo se ve el reparto
 
-```
-   ┌───────────────────────────────────────────────┐
-   │                 FRONTERA                        │
-   │                                                 │
-   │   TESTEABLE                    HUMILDE          │
-   │   ─────────                    ───────          │
-   │   • decide qué mostrar         • pinta píxeles  │
-   │   • calcula, formatea          • lee/escribe    │
-   │   • aplica reglas                el detalle     │
-   │   • 90% del código             • 10% del código │
-   │   • cubierto por tests         • casi sin tests │
-   └───────────────────────────────────────────────┘
+```mermaid
+flowchart LR
+    subgraph Frontera["FRONTERA"]
+        direction LR
+        T["🧠 TESTEABLE<br/>• decide qué mostrar<br/>• calcula, formatea<br/>• aplica reglas<br/>• 90% del código<br/>• cubierto por tests"]
+        H["🖥️ HUMILDE<br/>• pinta píxeles<br/>• lee/escribe el detalle<br/>• 10% del código<br/>• casi sin tests"]
+    end
+
+    style T fill:#2e7d32,stroke:#a5d6a7,color:#fff,stroke-width:2px
+    style H fill:#37474f,stroke:#90a4ae,color:#fff,stroke-width:2px
 ```
 
 La meta es empujar hacia el objeto humilde la **menor cantidad de código posible**: solo lo que es imposible de probar.
@@ -61,12 +63,12 @@ El patrón se repite en cada límite: el detalle queda humilde, la política que
 ❌ Todo junto, imposible de testear sin la pantalla real:
 
 ```java
-class SaldoView {
-    void mostrar(Cuenta cuenta) {
-        double s = cuenta.getSaldo();
-        String texto = (s < 0 ? "-$" : "$") + Math.abs(s); // lógica escondida en la vista
-        etiqueta.setText(texto);        // dibujo real (no testeable)
-        etiqueta.setColor(s < 0 ? ROJO : NEGRO);
+class BalanceView {
+    void show(Account account) {
+        double balance = account.getBalance();
+        String text = (balance < 0 ? "-$" : "$") + Math.abs(balance); // logic hidden in the view
+        label.setText(text);        // real drawing (not testable)
+        label.setColor(balance < 0 ? RED : BLACK);
     }
 }
 ```
@@ -74,26 +76,26 @@ class SaldoView {
 ✅ Lógica en un objeto testeable, la vista queda humilde:
 
 ```java
-// Testeable: decide texto y color, no dibuja nada
-class SaldoPresenter {
-    SaldoViewModel preparar(Cuenta cuenta) {
-        double s = cuenta.getSaldo();
-        String texto = (s < 0 ? "-$" : "$") + Math.abs(s);
-        String color = s < 0 ? "ROJO" : "NEGRO";
-        return new SaldoViewModel(texto, color);
+// Testable: decides text and color, draws nothing
+class BalancePresenter {
+    BalanceViewModel prepare(Account account) {
+        double balance = account.getBalance();
+        String text = (balance < 0 ? "-$" : "$") + Math.abs(balance);
+        String color = balance < 0 ? "RED" : "BLACK";
+        return new BalanceViewModel(text, color);
     }
 }
 
-// Humilde: solo pinta lo que ya viene decidido
-class SaldoView {
-    void mostrar(SaldoViewModel vm) {
-        etiqueta.setText(vm.texto);
-        etiqueta.setColor(vm.color);
+// Humble: only paints what is already decided
+class BalanceView {
+    void show(BalanceViewModel vm) {
+        label.setText(vm.text);
+        label.setColor(vm.color);
     }
 }
 ```
 
-Ahora `SaldoPresenter` se prueba con simples asserts, sin arrancar la interfaz gráfica.
+Ahora `BalancePresenter` se prueba con simples asserts, sin arrancar la interfaz gráfica.
 
 ## Por qué también es un boundary arquitectónico
 
@@ -101,8 +103,12 @@ El objeto humilde y el testeable suelen quedar en **capas distintas**, con la de
 
 ```mermaid
 flowchart TD
-    H["Objeto humilde<br/>(capa externa)"] -->|depende de| I["Interfaz / View Model<br/>(capa interna)"]
-    T["Objeto testeable<br/>(capa interna)"] -->|implementa/usa| I
+    H["🖥️ Humble object<br/>(capa externa)"] ==>|depende de| I["📦 Interface / View Model<br/>(capa interna)"]
+    T["🧠 Testable object<br/>(capa interna)"] ==>|implementa/usa| I
+
+    style H fill:#37474f,stroke:#90a4ae,color:#fff,stroke-width:2px
+    style I fill:#1565c0,stroke:#90caf9,color:#fff,stroke-width:2px
+    style T fill:#2e7d32,stroke:#a5d6a7,color:#fff,stroke-width:2px
 ```
 
 ## Punto clave para recordar

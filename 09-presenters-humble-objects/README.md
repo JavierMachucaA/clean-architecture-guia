@@ -9,13 +9,23 @@ En los bordes de la arquitectura (la GUI, la base de datos, los servicios extern
 
 El **Humble Object Pattern** parte una frontera en dos: un objeto "humilde" con lo que no se puede testear (mínimo, casi sin lógica) y un objeto comprobable con todo lo importante.
 
-```
-   Frontera (boundary)
-   ─────────────────────────────────────
-   [ Testeable ]          [ Humilde ]
-   Presenter        ─►    View
-   Lógica de caso   ─►    Detalle técnico
-   de uso                 (GUI, BD, red)
+```mermaid
+flowchart LR
+    subgraph Boundary["Frontera (boundary)"]
+        direction LR
+        subgraph Testable["✅ Testeable"]
+            P["🧠 Presenter<br/>Use case logic"]
+        end
+        subgraph Humble["🖥️ Humilde"]
+            V["View<br/>Technical detail<br/>(GUI, DB, network)"]
+        end
+    end
+    P ==> V
+
+    style Testable fill:#2e7d32,stroke:#a5d6a7,color:#fff,stroke-width:2px
+    style Humble fill:#37474f,stroke:#90a4ae,color:#fff,stroke-width:2px
+    style P fill:#2e7d32,stroke:#a5d6a7,color:#fff,stroke-width:2px
+    style V fill:#37474f,stroke:#90a4ae,color:#fff,stroke-width:2px
 ```
 
 De esa idea nacen los **Presenters** (llenan un View Model, la View solo lo pinta), los **Gateways** (interfaces que declaran los casos de uso y otros implementan afuera) y los **Mappers** (transforman los datos al cruzar cada límite para que no se filtren dependencias).

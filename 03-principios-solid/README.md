@@ -72,8 +72,12 @@ SOLID no se queda en la clase. Cada principio escala hacia arriba:
 
 ```mermaid
 flowchart LR
-    SOLID["SOLID<br/>(clases y funciones)"] --> COMP["Principios de componentes"]
-    COMP --> ARQ["Arquitectura<br/>(boundaries y capas)"]
+    SOLID["🧠 SOLID<br/>(clases y funciones)"] ==> COMP["⚙️ Principios de componentes"]
+    COMP ==> ARQ["🖥️ Arquitectura<br/>(boundaries y capas)"]
+
+    style SOLID fill:#2e7d32,stroke:#a5d6a7,color:#fff,stroke-width:3px
+    style COMP fill:#1565c0,stroke:#90caf9,color:#fff,stroke-width:2px
+    style ARQ fill:#6a1b9a,stroke:#ce93d8,color:#fff,stroke-width:2px
 ```
 
 ## Referencia

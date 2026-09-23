@@ -8,15 +8,39 @@ Cuando un dato cruza un límite entre anillos, debe hacerlo en la forma **más s
 
 ```mermaid
 flowchart LR
-    CTRL["Controller"] -->|"request model<br/>(simple struct)"| INT["Interactor"]
-    INT -->|"response model<br/>(simple struct)"| PRES["Presenter"]
+    CTRL["🎮 Controller"] ==>|"📦 request model"| INT{{"⚙️ Interactor"}}
+    INT ==>|"📦 response model"| PRES["🖥️ Presenter"]
 
-    FORB["🚫 Prohibido cruzar la frontera con:<br/>· una Entity de negocio<br/>· una fila / row del ORM<br/>· un objeto del framework<br/>(HttpRequest, ResultSet, DataTable...)"]
+    style CTRL fill:#37474f,stroke:#90a4ae,stroke-width:2px,color:#fff
+    style PRES fill:#37474f,stroke:#90a4ae,stroke-width:2px,color:#fff
+    style INT fill:#c62828,stroke:#ff8a80,stroke-width:3px,color:#fff
+```
 
-    style CTRL fill:#455a64,stroke:#263238,stroke-width:2px,color:#fff
-    style PRES fill:#455a64,stroke:#263238,stroke-width:2px,color:#fff
-    style INT fill:#c62828,stroke:#8e0000,stroke-width:2px,color:#fff
-    style FORB fill:#4a148c,stroke:#6a1b9a,stroke-width:2px,color:#fff
+Lo que viaja son **paquetes de datos planos** (📦). En cambio, esto **nunca** debe cruzar la frontera:
+
+```mermaid
+flowchart TB
+    subgraph OK["✅ SÍ cruzan"]
+        direction LR
+        D1["📦 DTO / request model"]
+        D2["📦 DTO / response model"]
+        D3["📦 struct / mapa / tupla"]
+    end
+    subgraph NO["⛔ NO cruzan"]
+        direction LR
+        E1["🧠 Entity de negocio"]
+        E2["🗄️ fila / row del ORM"]
+        E3["🌐 objeto del framework"]
+    end
+
+    style OK fill:#1b5e20,stroke:#66bb6a,stroke-width:2px,color:#fff
+    style NO fill:#b71c1c,stroke:#ef5350,stroke-width:2px,color:#fff
+    style D1 fill:#2e7d32,stroke:#a5d6a7,color:#fff
+    style D2 fill:#2e7d32,stroke:#a5d6a7,color:#fff
+    style D3 fill:#2e7d32,stroke:#a5d6a7,color:#fff
+    style E1 fill:#c62828,stroke:#ffcdd2,color:#fff
+    style E2 fill:#c62828,stroke:#ffcdd2,color:#fff
+    style E3 fill:#c62828,stroke:#ffcdd2,color:#fff
 ```
 
 ## Por qué no una Entity ni una fila de DB
@@ -25,15 +49,15 @@ Si pasas una fila de la base de datos hacia adentro, un anillo interior terminar
 
 ```mermaid
 flowchart LR
-    DB[("Base de datos")] -->|"fila / row"| REPO["Gateway / Repository<br/>(Interface Adapters)"]
-    REPO -->|"DTO simple"| UC["Use Case (interior)"]
+    DB[("🗄️ Base de datos")] ==>|"🧱 fila / row"| REPO["🔄 Gateway / Repository<br/><i>traduce aquí</i>"]
+    REPO ==>|"📦 DTO simple"| UC["🧠 Use Case<br/>(interior)"]
 
-    DB -. "NO pasar la fila" .-> UC
+    DB -. "🚫 la fila NO pasa directo" .-> UC
 
-    style DB fill:#455a64,stroke:#263238,stroke-width:2px,color:#fff
-    style REPO fill:#6a1b9a,stroke:#4a148c,stroke-width:2px,color:#fff
-    style UC fill:#c62828,stroke:#8e0000,stroke-width:2px,color:#fff
-    linkStyle 2 stroke:#e74c3c,stroke-width:2px,stroke-dasharray:5 5
+    style DB fill:#37474f,stroke:#90a4ae,stroke-width:2px,color:#fff
+    style REPO fill:#6a1b9a,stroke:#ce93d8,stroke-width:3px,color:#fff
+    style UC fill:#c62828,stroke:#ff8a80,stroke-width:2px,color:#fff
+    linkStyle 2 stroke:#ff5252,stroke-width:3px,stroke-dasharray:6 4
 ```
 
 El repositorio **traduce** la fila a una estructura simple antes de entregarla al caso de uso. Así el interior nunca ve el formato del ORM.
@@ -41,18 +65,18 @@ El repositorio **traduce** la fila a una estructura simple antes de entregarla a
 ## Forma recomendada de los datos que cruzan
 
 ```mermaid
-flowchart TB
-    RM["Request Model<br/>(DTO de entrada)"] --> UC["Use Case Interactor"]
-    UC --> RSM["Response Model<br/>(DTO de salida)"]
-    RSM --> PR["Presenter"]
+flowchart LR
+    RM["📥 Request Model<br/>DTO de entrada"] ==> UC{{"⚙️ Use Case<br/>Interactor"}}
+    UC ==> RSM["📤 Response Model<br/>DTO de salida"]
+    RSM ==> PR["🖥️ Presenter"]
 
-    style RM fill:#1565c0,stroke:#0d47a1,stroke-width:2px,color:#fff
-    style RSM fill:#1565c0,stroke:#0d47a1,stroke-width:2px,color:#fff
-    style UC fill:#c62828,stroke:#8e0000,stroke-width:2px,color:#fff
-    style PR fill:#455a64,stroke:#263238,stroke-width:2px,color:#fff
+    style RM fill:#1565c0,stroke:#90caf9,stroke-width:2px,color:#fff
+    style RSM fill:#1565c0,stroke:#90caf9,stroke-width:2px,color:#fff
+    style UC fill:#c62828,stroke:#ff8a80,stroke-width:3px,color:#fff
+    style PR fill:#37474f,stroke:#90a4ae,stroke-width:2px,color:#fff
 ```
 
-Los modelos son **objetos planos**, inmutables si es posible, sin dependencias hacia frameworks.
+Los modelos son **objetos planos** (📥 entra, 📤 sale), inmutables si es posible, sin dependencias hacia frameworks.
 
 ## Comparativa: qué cruza y qué no
 
@@ -69,12 +93,12 @@ Los modelos son **objetos planos**, inmutables si es posible, sin dependencias h
 
 ```mermaid
 flowchart LR
-    A["Cada frontera define<br/>su propio formato"] --> B["Traduce al cruzar"] --> C["Entrega una<br/>estructura simple"] --> D["El otro lado nunca ve<br/>el formato original"]
+    A["🚧 Cada frontera define<br/>su propio formato"] ==> B["🔄 Traduce<br/>al cruzar"] ==> C["📦 Entrega una<br/>estructura simple"] ==> D["🔒 El otro lado nunca ve<br/>el formato original"]
 
-    style A fill:#455a64,stroke:#263238,stroke-width:2px,color:#fff
-    style B fill:#6a1b9a,stroke:#4a148c,stroke-width:2px,color:#fff
-    style C fill:#1565c0,stroke:#0d47a1,stroke-width:2px,color:#fff
-    style D fill:#2e7d32,stroke:#1b5e20,stroke-width:2px,color:#fff
+    style A fill:#37474f,stroke:#90a4ae,stroke-width:2px,color:#fff
+    style B fill:#6a1b9a,stroke:#ce93d8,stroke-width:2px,color:#fff
+    style C fill:#1565c0,stroke:#90caf9,stroke-width:2px,color:#fff
+    style D fill:#2e7d32,stroke:#a5d6a7,stroke-width:2px,color:#fff
 ```
 
 De esta forma, un cambio en la base de datos o en el framework se queda contenido en el anillo externo: solo cambia la traducción, no las estructuras que viajan hacia adentro ni las reglas de negocio.

@@ -12,20 +12,22 @@ La relación con un framework rara vez es entre iguales. El autor del framework 
 
 A cambio, el framework **no** se compromete contigo. Este desequilibrio es lo que Martin llama **acoplamiento asimétrico**: tú te casas con el framework, pero el framework no se casa contigo.
 
+```mermaid
+flowchart LR
+    CODE["📦 Your code<br/>inherit from me,<br/>implement my interfaces"]
+    FW["🌐 Framework<br/>author &amp; his agenda"]
+    TOTAL["⛔ Total commitment"]
+    NULL["✅ Zero commitment"]
+    CODE ==> FW
+    CODE -. asymmetry .-> TOTAL
+    FW -. asymmetry .-> NULL
+    style CODE fill:#2e7d32,stroke:#a5d6a7,color:#fff,stroke-width:3px
+    style FW fill:#37474f,stroke:#90a4ae,color:#fff,stroke-width:2px
+    style TOTAL fill:#c62828,stroke:#ff8a80,color:#fff,stroke-width:2px
+    style NULL fill:#37474f,stroke:#90a4ae,color:#fff,stroke-width:2px
 ```
-        TÚ                              FRAMEWORK
-    +-----------+                      +-----------+
-    |  Tu código | ==== depende ====>  |  Autor y  |
-    |            |                      |  su agenda |
-    +-----------+                      +-----------+
-         |                                   |
-         |  "Cásate conmigo:                 |  "Yo no me
-         |   hereda de mí,                   |   comprometo
-         |   implementa mis                  |   con tu
-         |   interfaces por todo"            |   producto"
-         v                                   v
-   Compromiso TOTAL  <----- asimetría -----> Compromiso NULO
-```
+
+El acoplamiento es asimétrico: tú te comprometes por completo con el framework, pero el framework no se compromete contigo.
 
 Con el tiempo, el framework crece en direcciones que no te sirven, cambia de versión mayor, o queda abandonado. Si te casaste con él, sus problemas se convierten en los tuyos.
 
@@ -36,20 +38,24 @@ La estrategia no es rechazar los frameworks, sino **mantenerlos a distancia**, e
 ```mermaid
 flowchart TD
     subgraph EXTERNO["Anillo externo — DETALLES"]
-      FW["Framework<br/>(web, ORM, DI...)"]
-      ADAP["Adaptadores / configuración<br/>que sí conocen el framework"]
+      FW["🌐 Framework<br/>(web, ORM, DI...)"]
+      ADAP["🔄 Adapters / config<br/>that do know the framework"]
     end
     subgraph NUCLEO["Núcleo — POLÍTICAS"]
-      UC["Casos de uso"]
-      ENT["Entidades"]
+      UC["⚙️ Use cases"]
+      ENT["🧠 Entities"]
     end
-    FW --> ADAP
-    ADAP --> UC
-    UC --> ENT
-    NUCLEO -. no conoce .-> FW
-    style NUCLEO fill:#dff0d8,stroke:#3c763d
-    style EXTERNO fill:#f2dede,stroke:#a94442
+    FW ==> ADAP
+    ADAP ==> UC
+    UC ==> ENT
+    UC -. 🚫 does not know .-> FW
+    style FW fill:#37474f,stroke:#90a4ae,color:#fff,stroke-width:2px
+    style ADAP fill:#6a1b9a,stroke:#ce93d8,color:#fff,stroke-width:2px
+    style UC fill:#2e7d32,stroke:#a5d6a7,color:#fff,stroke-width:3px
+    style ENT fill:#f9a825,stroke:#f57f17,color:#000,stroke-width:2px
 ```
+
+El framework toca solo la periferia: los adaptadores lo conocen, pero el núcleo (casos de uso y entidades) nunca depende de él.
 
 El framework toca solo la periferia. Si mañana cambias de framework, reescribes los adaptadores del anillo externo, no las reglas de negocio.
 

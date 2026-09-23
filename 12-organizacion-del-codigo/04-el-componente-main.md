@@ -15,20 +15,13 @@ Main no contiene reglas de negocio. Es donde vive el desorden inevitable del arr
 3. **Se las pasa al sistema** y le cede el control a los casos de uso de alto nivel.
 4. Es el **único** componente que conoce todos los detalles a la vez.
 
-```
-   Arranque del sistema (flujo temporal)
-
-   [ SO ]
-      │ ejecuta
-      ▼
-   ┌────────────────────────────────────────────────┐
-   │  MAIN  (sucio, bajo nivel)                       │
-   │  1. lee configuración                            │
-   │  2. new RepositorioDeReservasPostgres()          │  ← crea detalles concretos
-   │  3. new PasarelaDePagoStripe()                   │
-   │  4. new ReservarHabitacion(repo, pasarela)       │  ← inyecta dependencias
-   │  5. entrega el control ─────────────────────────┼──►  APLICACIÓN (alto nivel)
-   └────────────────────────────────────────────────┘         (solo ve interfaces)
+```mermaid
+flowchart TD
+    OS["🖥️ SO"] ==>|ejecuta| Main["⚙️ MAIN (sucio, bajo nivel)<br/>1. lee configuración<br/>2. new RepositorioDeReservasPostgres() — crea detalles concretos<br/>3. new PasarelaDePagoStripe()<br/>4. new ReservarHabitacion(repo, pasarela) — inyecta dependencias<br/>5. entrega el control"]
+    Main ==>|cede el control| App["🧠 APLICACIÓN (alto nivel)<br/>(solo ve interfaces)"]
+    style OS fill:#37474f,stroke:#90a4ae,color:#fff,stroke-width:2px
+    style Main fill:#c62828,stroke:#ff8a80,color:#fff,stroke-width:2px
+    style App fill:#2e7d32,stroke:#a5d6a7,color:#fff,stroke-width:3px
 ```
 
 ## Main es un plugin de la aplicación
@@ -37,10 +30,10 @@ La idea más importante: la relación no es "la app es parte de main", sino al r
 
 ```mermaid
 flowchart LR
-    Main["MAIN<br/>(plugin de bajo nivel)"] -->|conoce e instancia| App["APLICACIÓN<br/>(reglas de negocio, alto nivel)"]
+    Main["⚙️ MAIN<br/>(plugin de bajo nivel)"] ==>|conoce e instancia| App["🧠 APLICACIÓN<br/>(reglas de negocio, alto nivel)"]
     App -.->|NO conoce a| Main
-    style Main stroke-dasharray: 5 5
-    style App stroke:#2c3e50,stroke-width:3px
+    style Main fill:#c62828,stroke:#ff8a80,color:#fff,stroke-width:2px
+    style App fill:#2e7d32,stroke:#a5d6a7,color:#fff,stroke-width:3px
 ```
 
 La aplicación **no sabe** que Main existe; solo recibe interfaces ya resueltas. Por eso puedes tener **muchos Main** distintos —uno por entorno (dev, test, prod) o por país— sin tocar las reglas de negocio.

@@ -18,13 +18,18 @@ Representamos cada componente como un punto en un plano con **A en el eje vertic
 
 ```mermaid
 flowchart LR
-    ZD["Zona de dolor<br/>(I=0, A=0)<br/>estable + concreto"]
-    IDEAL_POL["Ideal política<br/>(I=0, A=1)"]
-    ZI["Zona de inutilidad<br/>(I=1, A=1)<br/>inestable + abstracto"]
-    IDEAL_DET["Ideal detalle<br/>(I=1, A=0)"]
-    ZD -.->|"main sequence"| ZI
+    ZD["🚫 Zona de dolor<br/>(I=0, A=0)<br/>estable + concreto"]
+    IDEAL_POL["🧠 Ideal política<br/>(I=0, A=1)"]
+    ZI["🚫 Zona de inutilidad<br/>(I=1, A=1)<br/>inestable + abstracto"]
+    IDEAL_DET["⚙️ Ideal detalle<br/>(I=1, A=0)"]
+    IDEAL_POL ==>|"main sequence"| IDEAL_DET
     IDEAL_POL --- ZD
     IDEAL_DET --- ZI
+
+    style ZD fill:#c62828,stroke:#ff8a80,color:#fff,stroke-width:2px
+    style ZI fill:#c62828,stroke:#ff8a80,color:#fff,stroke-width:2px
+    style IDEAL_POL fill:#2e7d32,stroke:#a5d6a7,color:#fff,stroke-width:3px
+    style IDEAL_DET fill:#1565c0,stroke:#90caf9,color:#fff,stroke-width:2px
 ```
 
 ## La Main Sequence
@@ -37,32 +42,27 @@ A + I = 1        =>       A = 1 - I
 
 Un componente sobre la main sequence tiene la abstracción **proporcional** a su estabilidad: si es muy estable es muy abstracto, y si es muy inestable es muy concreto. Ese es el equilibrio que buscan SDP y SAP en conjunto.
 
-Diagrama ASCII con el eje **A vertical** y el eje **I horizontal**, la diagonal de la main sequence y las dos zonas prohibidas:
+Gráfico A (eje vertical) vs I (eje horizontal). La **main sequence** es la diagonal `A = 1 − I` que une la esquina superior izquierda (ideal política) con la inferior derecha (ideal detalle). Las dos esquinas restantes son las zonas a evitar:
 
+```mermaid
+quadrantChart
+    title A (vertical) vs I (horizontal)
+    x-axis "I baja (estable)" --> "I alta (inestable)"
+    y-axis "A baja (concreto)" --> "A alta (abstracto)"
+    quadrant-1 "Zona de inutilidad"
+    quadrant-2 "Ideal politica"
+    quadrant-3 "Zona de dolor"
+    quadrant-4 "Ideal detalle"
+    Ideal politica: [0.03, 0.97]
+    Ideal detalle: [0.97, 0.03]
+    Zona de dolor: [0.03, 0.03]
+    Zona de inutilidad: [0.97, 0.97]
+    Sobre main sequence: [0.5, 0.5]
 ```
- A
-1.0 +----------------------------------------+
-    | (0,1)                    ZONA DE       |
-    |  *  ideal                INUTILIDAD    |
-    |    \  política           (1,1) --->  X |
-    |     \                                  |
-    |      \ M                               |
-0.5 +       \ A                              +
-    |        \ I                             |
-    |         \ N                            |
-    |          \  main sequence (A = 1 - I)  |
-    |           \ S                          |
-    | ZONA DE    \ E                         |
-    | DOLOR       \ Q     ideal              |
-0.0 + X <---(0,0)  \ * (1,0) detalle         +
-    +----------------------------------------+
-    0.0            0.5                    1.0  I
 
- Leyenda:
-   *  = posiciones ideales (extremos de la main sequence)
-   X  = esquinas a evitar (zonas de dolor e inutilidad)
-   \  = main sequence, la diagonal de (0,1) a (1,0)
-```
+- `*` posiciones ideales: los extremos de la main sequence (ideal política e ideal detalle).
+- `X` esquinas a evitar: zona de dolor (0,0) y zona de inutilidad (1,1).
+- La main sequence es la diagonal de (0,1) a (1,0), donde `A = 1 − I`.
 
 ## Zona de dolor
 

@@ -26,7 +26,10 @@ El polimorfismo permite invertir la dirección de una dependencia respecto al fl
 
 ```mermaid
 flowchart LR
-    HL["Módulo de alto nivel<br/>(política)"] -->|depende de| LL["Módulo de bajo nivel<br/>(detalle: e.g. driver)"]
+    HL["🧠 High-Level Module<br/>(policy)"] ==>|depende de| LL["⚙️ Low-Level Module<br/>(detalle: e.g. driver)"]
+
+    style HL fill:#2e7d32,stroke:#a5d6a7,color:#fff,stroke-width:3px
+    style LL fill:#37474f,stroke:#90a4ae,color:#fff,stroke-width:2px
 ```
 
 El alto nivel queda atado al detalle. Cambiar el detalle obliga a recompilar y redeployar el alto nivel.
@@ -35,19 +38,36 @@ El alto nivel queda atado al detalle. Cambiar el detalle obliga a recompilar y r
 
 ```mermaid
 flowchart LR
-    HL["Módulo de alto nivel<br/>(política)"] -->|usa| I["«interface»<br/>abstracción"]
-    LL["Módulo de bajo nivel<br/>(detalle)"] -.implementa.-> I
+    HL["🧠 High-Level Module<br/>(policy)"] ==>|usa| I["🔌 «interface»<br/>Abstraction"]
+    LL["⚙️ Low-Level Module<br/>(detalle)"] -.implementa.-> I
 
-    style I stroke-dasharray: 5 5
+    style HL fill:#2e7d32,stroke:#a5d6a7,color:#fff,stroke-width:3px
+    style I fill:#1565c0,stroke:#90caf9,color:#fff,stroke-width:2px,stroke-dasharray: 5 5
+    style LL fill:#37474f,stroke:#90a4ae,color:#fff,stroke-width:2px
 ```
 
 Ahora el detalle **depende** de la abstracción, y el flujo de control (alto → bajo) va en dirección **opuesta** a la dependencia de código (bajo → abstracción ← alto).
 
+```mermaid
+flowchart LR
+    subgraph Flow["🔄 Flujo de control"]
+        direction LR
+        H1["🧠 High-Level"] ==> L1["⚙️ Low-Level"]
+    end
+    subgraph Dep["📦 Dependencia de código (invertida)"]
+        direction LR
+        H2["🧠 High-Level"] ==> I2["🔌 Interface"]
+        L2["⚙️ Low-Level"] ==> I2
+    end
+
+    style H1 fill:#2e7d32,stroke:#a5d6a7,color:#fff,stroke-width:2px
+    style L1 fill:#37474f,stroke:#90a4ae,color:#fff,stroke-width:2px
+    style H2 fill:#2e7d32,stroke:#a5d6a7,color:#fff,stroke-width:2px
+    style L2 fill:#37474f,stroke:#90a4ae,color:#fff,stroke-width:2px
+    style I2 fill:#1565c0,stroke:#90caf9,color:#fff,stroke-width:2px
 ```
-   Flujo de control:   Alto nivel ─────────►  Bajo nivel
-   Dependencia código: Alto nivel ─►(interfaz)◄───── Bajo nivel
-                                    (¡invertida!)
-```
+
+El flujo de control va de alto nivel hacia bajo nivel, mientras que la dependencia de código queda **invertida**: tanto el alto como el bajo nivel apuntan hacia la interfaz.
 
 ## Por qué esto es la clave de la arquitectura
 
@@ -55,9 +75,14 @@ Con inversión de dependencias puedes decidir **qué depende de qué**, sin impo
 
 ```mermaid
 flowchart TD
-    A["Poder invertir cualquier dependencia"] --> B["Los detalles (DB, UI, framework)<br/>dependen de las reglas de negocio"]
-    B --> C["Las reglas de negocio NO dependen<br/>de ningún detalle"]
-    C --> D["Boundaries + arquitectura plugin<br/>(base de Clean Architecture)"]
+    A["🔄 Poder invertir cualquier dependencia"] ==> B["🗄️ Los detalles (DB, UI, framework)<br/>dependen de las reglas de negocio"]
+    B ==> C["🧠 Las reglas de negocio NO dependen<br/>de ningún detalle"]
+    C ==> D["✅ Boundaries + arquitectura plugin<br/>(base de Clean Architecture)"]
+
+    style A fill:#6a1b9a,stroke:#ce93d8,color:#fff,stroke-width:2px
+    style B fill:#37474f,stroke:#90a4ae,color:#fff,stroke-width:2px
+    style C fill:#2e7d32,stroke:#a5d6a7,color:#fff,stroke-width:3px
+    style D fill:#2e7d32,stroke:#a5d6a7,color:#fff,stroke-width:2px
 ```
 
 Esto habilita el **despliegue y desarrollo independiente**: puedes compilar y desplegar los componentes de bajo nivel por separado de las políticas de negocio.

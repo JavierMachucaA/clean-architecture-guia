@@ -10,9 +10,14 @@ De ahí nace la misión de la arquitectura:
 
 ```mermaid
 flowchart LR
-    S["Software = blando<br/>(hecho para cambiar)"] --> A["Arquitectura"]
-    A --> O["Deja opciones abiertas<br/>el mayor tiempo posible"]
-    O --> D["Decisiones diferidas =<br/>menos riesgo, más información"]
+    S["📦 Software = soft<br/>(made to change)"] ==> A["🧠 Architecture"]
+    A ==> O["✅ Keeps options open<br/>as long as possible"]
+    O ==> D["⚙️ Deferred decisions =<br/>less risk, more information"]
+
+    style S fill:#1565c0,stroke:#90caf9,color:#fff,stroke-width:2px
+    style A fill:#2e7d32,stroke:#a5d6a7,color:#fff,stroke-width:3px
+    style O fill:#2e7d32,stroke:#a5d6a7,color:#fff,stroke-width:2px
+    style D fill:#37474f,stroke:#90a4ae,color:#fff,stroke-width:2px
 ```
 
 ## Política vs detalles
@@ -33,20 +38,22 @@ Ejemplos típicos de detalles: la base de datos, el framework web, el servidor, 
 
 El buen arquitecto **maximiza la cantidad de decisiones no tomadas**.
 
-```
-   NÚCLEO                                    PERIFERIA
-   (política, estable)                       (detalles, aplazables)
+```mermaid
+flowchart TB
+    CORE["🧠 Business rules + use cases<br/>(policy, stable)<br/>NON-deferrable decision"]
+    CORE ==> DB["🗄️ DB<br/>which engine?"]
+    CORE ==> WEB["🖥️ Web<br/>REST or GraphQL?"]
+    CORE ==> FW["⚙️ Framework<br/>which one?"]
+    CORE ==> SRV["📦 Server<br/>on-prem or cloud?"]
 
-   ┌───────────────────────┐
-   │   Reglas de negocio    │◄───── decisión NO aplazable
-   │   Casos de uso         │
-   └───────────┬───────────┘
-               │ (la política no depende de los detalles)
-     ┌─────────┼──────────┬─────────────┐
-     ▼         ▼          ▼             ▼
-  [ DB ]   [ Web ]   [Framework]   [ Servidor ]   ◄─ decisiones APLAZABLES
-   "¿qué motor?"  "¿REST o GraphQL?"  "¿cuál?"  "¿on-prem o cloud?"
+    style CORE fill:#2e7d32,stroke:#a5d6a7,color:#fff,stroke-width:3px
+    style DB fill:#37474f,stroke:#90a4ae,color:#fff,stroke-width:2px
+    style WEB fill:#37474f,stroke:#90a4ae,color:#fff,stroke-width:2px
+    style FW fill:#37474f,stroke:#90a4ae,color:#fff,stroke-width:2px
+    style SRV fill:#37474f,stroke:#90a4ae,color:#fff,stroke-width:2px
 ```
+
+El núcleo (política, estable) es una decisión **no** aplazable; la periferia (DB, web, framework, servidor) son detalles **aplazables**. La política no depende de los detalles: por eso las flechas apuntan hacia ellos y no al revés.
 
 ## Diferir decisiones da poder
 
@@ -57,11 +64,16 @@ Aplazar una decisión sobre un detalle tiene dos beneficios concretos:
 
 ```mermaid
 flowchart TD
-    P["Política de negocio<br/>(no sabe qué DB usa)"] -->|habla contra| I["Interfaz / boundary"]
-    I --> DB1["Opción A:<br/>PostgreSQL"]
-    I --> DB2["Opción B:<br/>MongoDB"]
-    I --> DB3["Opción C:<br/>archivos en memoria<br/>(para test)"]
-    style P fill:#dfe
+    P["🧠 Business policy<br/>(does not know which DB it uses)"] ==>|talks against| I["📦 Interface / boundary"]
+    I ==> DB1["🗄️ Option A:<br/>PostgreSQL"]
+    I ==> DB2["🗄️ Option B:<br/>MongoDB"]
+    I ==> DB3["🗄️ Option C:<br/>in-memory files<br/>(for test)"]
+
+    style P fill:#2e7d32,stroke:#a5d6a7,color:#fff,stroke-width:3px
+    style I fill:#1565c0,stroke:#90caf9,color:#fff,stroke-width:2px
+    style DB1 fill:#37474f,stroke:#90a4ae,color:#fff,stroke-width:2px
+    style DB2 fill:#37474f,stroke:#90a4ae,color:#fff,stroke-width:2px
+    style DB3 fill:#37474f,stroke:#90a4ae,color:#fff,stroke-width:2px
 ```
 
 Si la decisión de base de datos ya está tomada y clavada en el corazón del sistema, cambiarla cuesta una fortuna. Si está diferida detrás de un boundary, es solo un detalle intercambiable.

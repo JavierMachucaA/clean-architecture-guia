@@ -7,17 +7,13 @@ Propuesta por Alistair Cockburn, la **Arquitectura Hexagonal** (también llamada
 - **Port (puerto)** → una **interfaz**: define *qué* necesita o *qué* ofrece la aplicación, en términos del dominio.
 - **Adapter (adaptador)** → una **implementación** concreta del puerto que habla con una tecnología específica (base de datos, HTTP, cola de mensajes, UI).
 
-```
-                 ADAPTERS (detalles)                PORTS (interfaces)
-   ┌───────────────┐                        ┌───────────────────────────┐
-   │  Controlador  │ ──llama al──►          │                           │
-   │  REST / CLI   │        (driving port)  │      NÚCLEO / DOMINIO      │
-   └───────────────┘                        │   (casos de uso + reglas) │
-                                            │                           │
-   ┌───────────────┐        (driven port)   │                           │
-   │  Repositorio  │ ◄──implementa──         │                           │
-   │  SQL / Mongo  │                        └───────────────────────────┘
-   └───────────────┘
+```mermaid
+flowchart LR
+    Driving["🖥️ Controlador<br/>REST / CLI<br/>(adapter)"] ==>|"llama al (driving port)"| Core["🧠 NÚCLEO / DOMINIO<br/>(casos de uso + reglas)"]
+    Driven["🗄️ Repositorio<br/>SQL / Mongo<br/>(adapter)"] ==>|"implementa (driven port)"| Core
+    style Driving fill:#6a1b9a,stroke:#ce93d8,color:#fff,stroke-width:2px
+    style Driven fill:#6a1b9a,stroke:#ce93d8,color:#fff,stroke-width:2px
+    style Core fill:#2e7d32,stroke:#a5d6a7,color:#fff,stroke-width:3px
 ```
 
 ## Los dos lados del hexágono
@@ -36,20 +32,27 @@ Clean Architecture, Hexagonal y otras (Onion, DCI, BCE) son —según Uncle Bob�
 ```mermaid
 flowchart LR
     subgraph Hex["Hexagonal"]
-        H1[Adapters]
-        H2[Ports]
-        H3["Núcleo<br/>(dominio + casos de uso)"]
+        H1["⚙️ Adapters"]
+        H2["🔌 Ports"]
+        H3["🧠 Núcleo<br/>(dominio + casos de uso)"]
     end
     subgraph Clean["Clean Architecture"]
-        C1["Frameworks & Drivers<br/>(anillo externo)"]
-        C2["Interface Adapters"]
+        C1["⚙️ Frameworks & Drivers<br/>(anillo externo)"]
+        C2["🔌 Interface Adapters"]
         C3["Casos de uso"]
-        C4["Entidades<br/>(anillo interno)"]
+        C4["🧠 Entidades<br/>(anillo interno)"]
     end
     H1 -.equivale.-> C1
     H1 -.equivale.-> C2
     H2 -.equivale.-> C3
     H3 -.equivale.-> C4
+    style H1 fill:#6a1b9a,stroke:#ce93d8,color:#fff,stroke-width:2px
+    style H2 fill:#1565c0,stroke:#90caf9,color:#fff,stroke-width:2px
+    style H3 fill:#2e7d32,stroke:#a5d6a7,color:#fff,stroke-width:3px
+    style C1 fill:#37474f,stroke:#90a4ae,color:#fff,stroke-width:2px
+    style C2 fill:#6a1b9a,stroke:#ce93d8,color:#fff,stroke-width:2px
+    style C3 fill:#1565c0,stroke:#90caf9,color:#fff,stroke-width:2px
+    style C4 fill:#2e7d32,stroke:#a5d6a7,color:#fff,stroke-width:3px
 ```
 
 | Concepto Hexagonal | Anillo de Clean Architecture |

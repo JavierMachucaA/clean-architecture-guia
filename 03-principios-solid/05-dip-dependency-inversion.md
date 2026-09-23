@@ -30,27 +30,34 @@ Sin DIP, el alto nivel apunta al bajo nivel (a la concreción). Con DIP, se **in
 ```mermaid
 flowchart TD
     subgraph SIN["Sin DIP ❌"]
-        A1["Política<br/>(alto nivel)"] --> B1["ServicioConcreto<br/>(bajo nivel)"]
+        A1["🧠 Policy<br/>(high level)"] ==> B1["🗄️ ConcreteService<br/>(low level)"]
     end
 
     subgraph CON["Con DIP ✅"]
-        A2["Política<br/>(alto nivel)"] --> I["«interface»<br/>Servicio"]
-        B2["ServicioConcreto<br/>(bajo nivel)"] -.implementa.-> I
+        A2["🧠 Policy<br/>(high level)"] ==> I["📦 «interface»<br/>Service"]
+        B2["🗄️ ConcreteService<br/>(low level)"] -.implementa.-> I
     end
+
+    style A1 fill:#2e7d32,stroke:#a5d6a7,color:#fff,stroke-width:3px
+    style B1 fill:#c62828,stroke:#ff8a80,color:#fff,stroke-width:2px
+    style A2 fill:#2e7d32,stroke:#a5d6a7,color:#fff,stroke-width:3px
+    style I fill:#1565c0,stroke:#90caf9,color:#fff,stroke-width:2px
+    style B2 fill:#37474f,stroke:#90a4ae,color:#fff,stroke-width:2px
 ```
 
 Ahora el bajo nivel apunta hacia arriba, hacia la abstracción que define el alto nivel. **El flujo de control y el flujo de dependencias del código van en sentidos opuestos.**
 
-```
-   Flujo de control  ─────────────►
-   ┌──────────┐        ┌──────────────┐        ┌───────────────┐
-   │ Política │───────►│ «Servicio»   │◄╌╌╌╌╌╌╌│ ServicioConcr.│
-   │ (alto)   │        │  (abstracción)│        │   (bajo)      │
-   └──────────┘        └──────────────┘        └───────────────┘
-   Dependencia del código  ◄──────── se INVIERTE, cruza el boundary
+```mermaid
+flowchart LR
+    P["🧠 Policy<br/>(high level)"] ==> I["📦 «Service»<br/>(abstraction)"]
+    C["🗄️ ConcreteService<br/>(low level)"] -.code dependency (inverted).-> I
+
+    style P fill:#2e7d32,stroke:#a5d6a7,color:#fff,stroke-width:3px
+    style I fill:#1565c0,stroke:#90caf9,color:#fff,stroke-width:2px
+    style C fill:#37474f,stroke:#90a4ae,color:#fff,stroke-width:2px
 ```
 
-Esa línea de la interfaz es el **límite arquitectónico (boundary)**. DIP es el mecanismo que permite trazarlo.
+El flujo de control va de `Policy` hacia `ConcreteService`, pero la **dependencia del código se invierte**: el concreto apunta hacia la abstracción y cruza el boundary. Esa línea de la interfaz es el **límite arquitectónico (boundary)**. DIP es el mecanismo que permite trazarlo.
 
 ## El problema de crear las concreciones: Abstract Factory
 
@@ -58,11 +65,17 @@ Hay una regla incómoda: para *usar* un objeto concreto, alguien debe **crearlo*
 
 ```mermaid
 flowchart TD
-    APP["Aplicación<br/>(alto nivel)"] --> SF["«interface» ServicioFactory<br/>crear()"]
-    APP --> SVC["«interface» Servicio"]
-    SFI["ServicioFactoryImpl<br/>(bajo nivel)"] -.implementa.-> SF
-    SFI --> CONC["ServicioConcreto"]
+    APP["🧠 Application<br/>(high level)"] ==> SF["📦 «interface» ServiceFactory<br/>create()"]
+    APP ==> SVC["📦 «interface» Service"]
+    SFI["🔄 ServiceFactoryImpl<br/>(low level)"] -.implementa.-> SF
+    SFI ==> CONC["🗄️ ConcreteService"]
     CONC -.implementa.-> SVC
+
+    style APP fill:#2e7d32,stroke:#a5d6a7,color:#fff,stroke-width:3px
+    style SF fill:#1565c0,stroke:#90caf9,color:#fff,stroke-width:2px
+    style SVC fill:#1565c0,stroke:#90caf9,color:#fff,stroke-width:2px
+    style SFI fill:#6a1b9a,stroke:#ce93d8,color:#fff,stroke-width:2px
+    style CONC fill:#37474f,stroke:#90a4ae,color:#fff,stroke-width:2px
 ```
 
 La aplicación pide un `Servicio` a una `ServicioFactory` (ambas abstracciones). La **fábrica concreta** —que vive del lado de los detalles— es la única que conoce la clase concreta y hace el `new`. Así, la creación de concreciones queda **aislada** al otro lado del boundary.
@@ -72,31 +85,31 @@ La aplicación pide un `Servicio` a una `ServicioFactory` (ambas abstracciones).
 ### ❌ Mal aplicado — el alto nivel depende de la concreción
 
 ```
-class ServicioDeCorreoSMTP { enviar(msg) { ... } }
+class SmtpMailService { send(msg) { ... } }
 
-class Notificador {                     // alto nivel
-    s = new ServicioDeCorreoSMTP()      // ❌ depende de la concreción y la crea
-    notificar(m) { s.enviar(m) }
+class Notifier {                        // high level
+    s = new SmtpMailService()           // depends on the concretion and creates it
+    notify(m) { s.send(m) }
 }
 ```
 
-Cambiar de SMTP a otro proveedor obliga a editar `Notificador`.
+Cambiar de SMTP a otro proveedor obliga a editar `Notifier`.
 
 ### ✅ Bien aplicado — el alto nivel depende de la abstracción
 
 ```
-interface ServicioDeMensajeria { enviar(msg) }
+interface MessagingService { send(msg) }
 
-class Notificador {                     // alto nivel
-    constructor(ServicioDeMensajeria s) // ❌→✅ depende de la abstracción (inyectada)
-    notificar(m) { s.enviar(m) }
+class Notifier {                        // high level
+    constructor(MessagingService s)     // depends on the abstraction (injected)
+    notify(m) { s.send(m) }
 }
 
-class CorreoSMTP  implements ServicioDeMensajeria { enviar(m){...} }   // bajo nivel
-class SmsProveedor implements ServicioDeMensajeria { enviar(m){...} }  // bajo nivel
+class SmtpMail    implements MessagingService { send(m){...} }   // low level
+class SmsProvider implements MessagingService { send(m){...} }   // low level
 ```
 
-`Notificador` no sabe ni le importa qué implementación recibe. Los detalles concretos dependen de la abstracción, no al revés.
+`Notifier` no sabe ni le importa qué implementación recibe. Los detalles concretos dependen de la abstracción, no al revés.
 
 ## Punto clave para recordar
 

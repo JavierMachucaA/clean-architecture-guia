@@ -12,25 +12,42 @@ Edsger Dijkstra demostró que cualquier programa puede construirse con solo **tr
 
 ```mermaid
 flowchart TD
-    A["Secuencia<br/>(un paso tras otro)"] 
-    B["Selección<br/>(if / else, switch)"]
-    C["Iteración<br/>(while, for)"]
+    A["⚙️ Sequence<br/>(un paso tras otro)"]
+    B["⚙️ Selection<br/>(if / else, switch)"]
+    C["⚙️ Iteration<br/>(while, for)"]
     A --- B --- C
+
+    style A fill:#2e7d32,stroke:#a5d6a7,color:#fff,stroke-width:2px
+    style B fill:#2e7d32,stroke:#a5d6a7,color:#fff,stroke-width:2px
+    style C fill:#2e7d32,stroke:#a5d6a7,color:#fff,stroke-width:2px
 ```
 
 El `goto` permitía saltar a cualquier parte del código, creando "código spaghetti" imposible de razonar. Al prohibirlo, cada bloque tiene una entrada y una salida claras.
 
+```mermaid
+flowchart LR
+    subgraph Chaos["⛔ Con goto (caos)"]
+        direction TB
+        G1["Block 1"] ==> G2["Block 2"]
+        G2 ==> G3["Block 3"]
+        G3 ==> G1
+        G2 ==> G1
+    end
+    subgraph Ordered["✅ Estructurada (orden)"]
+        direction TB
+        S1["🖥️ Entry"] ==> S2["⚙️ Block"]
+        S2 ==> S3["📦 Exit"]
+    end
+
+    style G1 fill:#c62828,stroke:#ff8a80,color:#fff,stroke-width:2px
+    style G2 fill:#c62828,stroke:#ff8a80,color:#fff,stroke-width:2px
+    style G3 fill:#c62828,stroke:#ff8a80,color:#fff,stroke-width:2px
+    style S1 fill:#1565c0,stroke:#90caf9,color:#fff,stroke-width:2px
+    style S2 fill:#2e7d32,stroke:#a5d6a7,color:#fff,stroke-width:2px
+    style S3 fill:#1565c0,stroke:#90caf9,color:#fff,stroke-width:2px
 ```
-   Con goto (caos)                Estructurada (orden)
-   ┌───┐                          ┌───────────┐
-   │   │──┐   ┌──►┌───┐           │ entrada   │
-   └───┘  │   │   │   │           ├───────────┤
-   ┌───┐◄─┘   │   └───┘           │  bloque   │
-   │   │──────┘                   ├───────────┤
-   └───┘  saltos cruzados         │  salida   │
-                                  └───────────┘
-                                  1 entrada, 1 salida
-```
+
+A la izquierda, los saltos cruzados del `goto` entran y salen por cualquier punto (caos). A la derecha, el bloque estructurado tiene **una entrada y una salida** claras.
 
 ## Por qué importa: descomposición y prueba
 
@@ -38,11 +55,18 @@ La disciplina estructurada permite **descomponer** un problema grande en funcion
 
 ```mermaid
 flowchart TD
-    P["Problema grande"] --> F1["Función A"]
-    P --> F2["Función B"]
-    P --> F3["Función C"]
-    F2 --> F2a["subfunción B1"]
-    F2 --> F2b["subfunción B2"]
+    P["🧠 Big Problem"] ==> F1["⚙️ Function A"]
+    P ==> F2["⚙️ Function B"]
+    P ==> F3["⚙️ Function C"]
+    F2 ==> F2a["⚙️ Subfunction B1"]
+    F2 ==> F2b["⚙️ Subfunction B2"]
+
+    style P fill:#2e7d32,stroke:#a5d6a7,color:#fff,stroke-width:3px
+    style F1 fill:#1565c0,stroke:#90caf9,color:#fff,stroke-width:2px
+    style F2 fill:#1565c0,stroke:#90caf9,color:#fff,stroke-width:2px
+    style F3 fill:#1565c0,stroke:#90caf9,color:#fff,stroke-width:2px
+    style F2a fill:#6a1b9a,stroke:#ce93d8,color:#fff,stroke-width:2px
+    style F2b fill:#6a1b9a,stroke:#ce93d8,color:#fff,stroke-width:2px
 ```
 
 ## La conexión con la ciencia y las pruebas
